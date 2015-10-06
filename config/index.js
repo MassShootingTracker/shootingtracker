@@ -1,1 +1,2 @@
-module.exports = require('./local.json');
+//module.exports = require('./local.json');
+module.exports = {};
