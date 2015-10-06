@@ -71,11 +71,11 @@ GoogleDocs.prototype.refreshLocalData = function refreshLocalData() {
         return shooting.date.indexOf(thisYear) > -1;
       }).length;
 
-      var daysSinceLastShooting = moment(new Date(result[0].date)).fromNow().split(' ')[0];
-
       result = _.sortBy(result, function(item) {
         return -1 * moment(new Date(item.date)).unix();
       })
+
+      var daysSinceLastShooting = moment(new Date(result[0].date)).fromNow().split(' ')[0];
 
       result = _.map(result, function(item) {
 
