@@ -7,10 +7,6 @@ function Api(app) {
   this.app = app;
   this.apiKey = config.app.apiKey;
 
-  if (!this.apiKey) {
-    throw new Error('API key not found');
-  }
-
   _.bindAll(this, 'syncData');
 
 

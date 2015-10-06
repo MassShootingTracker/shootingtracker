@@ -9,6 +9,8 @@ var yargs = require('yargs').argv;
 
 var task = require('./index');
 
+var app = require('../index');
+
 var debugServer = !!(yargs['debug-server'] || yargs.debug);
 
 var runTasks = _.filter([
@@ -32,7 +34,7 @@ gulp.task('run:nodemon', function(callback) {
   var stream = nodemon({
     args: task.getConfigFiles(),
     ignore: 'data/*',
-    ext: 'js json jade',
+    ext: 'js json hbs',
     nodeArgs: debugServer ? ['--debug'] : [],
     script: './index.js',
     verbose: !!(yargs.verbose || yargs.V)
@@ -53,6 +55,14 @@ gulp.task('run:all', function(callback) {
     sequence.apply(this, runTasks);
     sequence('watch:all');
 
+  });
+});
+
+gulp.task('run:prod', function(callback) {
+  /*jshint unused:false */
+  sequence('build',
+           function() {
+    app.start();
   });
 });
 

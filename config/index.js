@@ -1,6 +1,6 @@
-//module.exports = require('./local.json');
+var config = require('./local.json');
 
-module.exports = {
+module.exports = config || {
   "app": {
     "port": 3000,
     "apiKey": process.env.API_KEY

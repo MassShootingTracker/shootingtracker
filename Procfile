@@ -1,1 +1,1 @@
-web: gulp run:fast:build
+web: gulp run:prod

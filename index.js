@@ -32,16 +32,21 @@ app.use(function(err, req, res, next) {
   res.status(500).send('Internal server error');
 });
 
-app.services.googledocs.refreshLocalData()
-  .then(function() {
+exports.start = function start() {
 
-    var server = app.listen(config.app.port, function () {
-      var host = server.address().address;
-      var port = server.address().port;
+  app.services.googledocs.refreshLocalData()
+    .then(function() {
 
-      console.log('App listening at http://%s:%s', host, port);
+      var server = app.listen(config.app.port, function () {
+        var host = server.address().address;
+        var port = server.address().port;
+
+        console.log('App listening at http://%s:%s', host, port);
+      });
+    })
+    .catch(function(err) {
+      console.error(err.stack);
     });
-  })
-  .catch(function(err) {
-    console.error(err.stack);
-  });
+
+}
+

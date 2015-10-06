@@ -130,66 +130,13 @@ gulp.task('build', function(callback) {
     'minify:site:style'
   ];
 
-  var args = [build, 'build:manifest', callback];
+  var args = [build, callback];
 
   if (yargs.minify !== false) {
     args.splice(1, 0, minify);
   }
 
   return sequence.apply(this, args);
-
-});
-
-
-gulp.task('build:manifest', function(callback) {
-  sequence('build:manifest:clean',
-           'build:manifest:files',
-           callback);
-});
-
-
-gulp.task('build:manifest:clean', function() {
-
-  var old = [
-    'public/css/vendor-*',
-    'public/css/site-*',
-    'public/js/vendor-*',
-    'public/js/site-*'
-  ];
-
-  return gulp.src(old, {read: false}).pipe(rimraf());
-
-});
-
-
-gulp.task('build:manifest:files', function() {
-  // Creates a map from normal name -> hashed name.
-  // See config/manifest.json
-
-  var src = [
-    '.tmp/public/css/**/*.css',
-    '.tmp/public/js/**/*.js'
-  ];
-
-  return gulp.src(src, { base: task.path('./.tmp/public') })
-    .pipe(rev())
-    .pipe(rename(function(renamePath, file) {
-
-      var basename = path.basename(file.revOrigPath);
-      basename = path.basename(basename, renamePath.extname);
-      basename = S(basename);
-
-      if (basename.endsWith('.min')) {
-        renamePath.basename = basename.chompRight('.min').s +
-                              '-' + file.revHash + '.min';
-      }
-
-    }))
-    .pipe(gulp.dest('public'))
-    .pipe(rev.manifest())
-    .pipe(rename({ basename: 'manifest' }))
-    .pipe(chmod(exports.PERMISSIONS))
-    .pipe(gulp.dest('config'));
 
 });
 
