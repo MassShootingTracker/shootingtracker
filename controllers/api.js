@@ -5,11 +5,10 @@ var _ = require('lodash');
 
 function Api(app) {
   this.app = app;
-  this.apiKey = config.app.apiKey;
+  //this.apiKey = config.app.apiKey;
+  this.apiKey = process.env.API_KEY;
 
   _.bindAll(this, 'syncData');
-
-
 }
 
 module.exports = Api;

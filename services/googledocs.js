@@ -12,7 +12,10 @@ var Converter = require('csvtojson').Converter;
 
 function GoogleDocs(app) {
   this.app = app || {};
-  this.url = config['google-docs'].url;
+  //this.url = config['google-docs'].url;
+  this.url = process.env.GOOGLE_DOC_URL;
+
+  _.bindAll(this, 'refreshLocalData', 'getSheet', '_csvToJSON', '_writeJSONToFile');
 }
 
 module.exports = GoogleDocs;
