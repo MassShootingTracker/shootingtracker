@@ -1,5 +1,3 @@
-var config = require('./local.json');
-
 module.exports = {
   "app": {
     "port": 3000,
