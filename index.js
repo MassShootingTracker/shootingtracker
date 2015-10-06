@@ -16,6 +16,7 @@ app.engine('.hbs', exphbs({
 }));
 
 app.set('view engine', '.hbs');
+app.set('port', (process.env.PORT || 5000));
 
 app.use(express.static('public'));
 
@@ -37,7 +38,7 @@ exports.start = function start() {
   app.services.googledocs.refreshLocalData()
     .then(function() {
 
-      var server = app.listen(config.app.port, function () {
+      var server = app.listen(app.get('port'), function () {
         var host = server.address().address;
         var port = server.address().port;
 
