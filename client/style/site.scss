@@ -1,9 +1,28 @@
 body, html {
   height: 100%;
+  font-family: 'Raleway', sans-serif;
 }
 
 .center {
   text-align: center;
+}
+
+.navbar, .jumbotron {
+  background-color: #313131;
+  color: #efefef;
+}
+
+.navbar {
+  border-radius: 0;
+
+   a.navbar-brand, .navbar-nav > li > a {
+    color: #efefef;
+
+    &:hover {
+      color: #ddd;
+
+    }
+  }
 }
 
 .mst-jumbotron-btns {
@@ -16,6 +35,16 @@ body, html {
 .mst-button-row {
   width: 100%;
   text-align: center;
+
+  padding-bottom: 20px;
+
+  a {
+    margin-right: 10px;
+  }
+
+  i {
+    margin-right: 5px;
+  }
 }
 
 .mst-shooting-definition {

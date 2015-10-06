@@ -31,6 +31,7 @@ gulp.task('run:nodemon', function(callback) {
 
   var stream = nodemon({
     args: task.getConfigFiles(),
+    ignore: 'data/*',
     ext: 'js json jade',
     nodeArgs: debugServer ? ['--debug'] : [],
     script: './index.js',
