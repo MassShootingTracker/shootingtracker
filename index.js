@@ -6,34 +6,35 @@ var exphbs  = require('express-handlebars');
 var Controllers = require('./controllers');
 var Services = require('./services');
 
-var app = express();
+exports.start = function start(environment) {
 
-app.engine('.hbs', exphbs({
-  extname: '.hbs',
-  layoutsDir: 'views/layouts/',
-  partialsDir: 'views/partials/',
-  defaultLayout: 'main'
-}));
+  var app = express();
 
-app.set('view engine', '.hbs');
-app.set('port', (process.env.PORT || 5000));
+  app.engine('.hbs', exphbs({
+    extname: '.hbs',
+    layoutsDir: 'views/layouts/',
+    partialsDir: 'views/partials/',
+    defaultLayout: 'main'
+  }));
 
-app.use(express.static('public'));
+  app.set('view engine', '.hbs');
+  app.set('port', (process.env.PORT || 5000));
+  app.set('environment', environment);
 
-app.use(bodyParser.urlencoded({extended: true}));
-app.use(bodyParser.json());
+  app.use(express.static('public'));
 
-app.use(methodOverride());
+  app.use(bodyParser.urlencoded({extended: true}));
+  app.use(bodyParser.json());
 
-(new Controllers(app)).register();
-(new Services(app));
+  app.use(methodOverride());
 
-app.use(function(err, req, res, next) {
-  console.error(err.stack);
-  res.status(500).send('Internal server error');
-});
+  (new Controllers(app)).register();
+  (new Services(app));
 
-exports.start = function start() {
+  app.use(function(err, req, res, next) {
+    console.error(err.stack);
+    res.status(500).send('Internal server error');
+  });
 
   app.services.googledocs.refreshLocalData()
     .then(function() {

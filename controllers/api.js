@@ -5,8 +5,13 @@ var _ = require('lodash');
 
 function Api(app) {
   this.app = app;
-  //this.apiKey = config.app.apiKey;
-  this.apiKey = process.env.API_KEY;
+
+  if (app.get('environment') === 'dev') {
+    this.apiKey = config.app.apiKey;
+  } else {
+    this.apiKey = process.env.API_KEY;
+  }
+
 
   _.bindAll(this, 'syncData');
 }

@@ -36,7 +36,7 @@ gulp.task('run:nodemon', function(callback) {
     ignore: 'data/*',
     ext: 'js json hbs',
     nodeArgs: debugServer ? ['--debug'] : [],
-    script: './index.js',
+    script: './run.js',
     verbose: !!(yargs.verbose || yargs.V)
   });
 
