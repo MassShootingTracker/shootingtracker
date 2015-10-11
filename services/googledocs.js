@@ -27,7 +27,7 @@ module.exports = GoogleDocs;
 GoogleDocs.prototype.getSheet = function getSheet() {
 
   return nodefn.lift(request)({
-    url: this.url
+    uri: this.url
   })
   .then(function(result) {
     return when.resolve(result[0].body);
