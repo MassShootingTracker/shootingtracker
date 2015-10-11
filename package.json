@@ -1,16 +1,16 @@
 {
   "name": "shootingtracker",
   "version": "1.0.0",
-  "description": "",
+  "description": "website for tracking mass shootings in America",
   "main": "index.js",
   "engines": {
     "node": "4.1.1"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "author": "",
-  "license": "ISC",
+    "test": "echo \"Error: no test specified\" && exit 1", 
+    "start": "node run.js"
+  },  
+  "license": "MIT",
   "dependencies": {
     "body-parser": "^1.4.3",
     "browserify": "~5.11.1",
@@ -82,5 +82,18 @@
     "watchify": "^1.0.2",
     "when": "^3.3.1",
     "yargs": "^1.2.1"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MassShootingTracker/shootingtracker.git"
+  },
+  "keywords": [
+    "mass",
+    "shooting",
+    "tracker"
+  ],
+  "bugs": {
+    "url": "https://github.com/MassShootingTracker/shootingtracker/issues"
+  },
+  "homepage": "https://github.com/MassShootingTracker/shootingtracker#readme"
 }

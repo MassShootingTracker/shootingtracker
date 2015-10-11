@@ -6,6 +6,8 @@ var exphbs  = require('express-handlebars');
 var Controllers = require('./controllers');
 var Services = require('./services');
 
+console.log("starting...");
+
 exports.start = function start(environment) {
 
   var app = express();
@@ -31,6 +33,7 @@ exports.start = function start(environment) {
   (new Controllers(app)).register();
   (new Services(app));
 
+
   app.use(function(err, req, res, next) {
     console.error(err.stack);
     res.status(500).send('Internal server error');
@@ -48,6 +51,8 @@ exports.start = function start(environment) {
     })
     .catch(function(err) {
       console.error(err.stack);
+        console.log('error: ' + err.message);
+
     });
 
 }
