@@ -18,13 +18,13 @@
 
 `http://127.0.0.1:5000`
 
-### 4. Refresh data from google docs on app start
+### Refresh data from google docs on app start
 
 The app pulls shooting data from `data/shootings.json`. To tell the app to repopulate this file from google docs before the app starts, use the flag `--refreshData`
 
 `gulp run --refreshData` or `node index.js --refreshData`
 
-### 4. Debugging:
+### Debugging:
 
 * Install node-inspector globally: `npm install -g node-inspector`
 
@@ -34,6 +34,6 @@ The app pulls shooting data from `data/shootings.json`. To tell the app to repop
 
 * Navigate to `http://127.0.0.1:8080/?ws=127.0.0.1:8080&port=5858` or whichever url is specified.
 
-### 5. Rebuild the client side app:
+### Rebuild the client side app:
 
 `gulp build`
