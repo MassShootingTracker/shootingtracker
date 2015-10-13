@@ -20,13 +20,13 @@
 
 ### 4. Refresh data from google docs on app start
 
-The app pulls shooting data from `data/shootings.json`. To tell the app to pull the latest from google docs at start, use the flag `--refreshData`
+The app pulls shooting data from `data/shootings.json`. To tell the app to repopulate this file from google docs before the app starts, use the flag `--refreshData`
 
 `gulp run --refreshData` or `node index.js --refreshData`
 
 ### 4. Debugging:
 
-* Install node-inspector globally: `npm install -g node-instpector`
+* Install node-inspector globally: `npm install -g node-inspector`
 
 * Run: `gulp run --debug` or `node --debug index.js`
 
@@ -34,10 +34,6 @@ The app pulls shooting data from `data/shootings.json`. To tell the app to pull 
 
 * Navigate to `http://127.0.0.1:8080/?ws=127.0.0.1:8080&port=5858` or whichever url is specified.
 
-### 5. Recompile, minify the client side app:
+### 5. Rebuild the client side app:
 
 `gulp build`
-
-##Notes
-
-  * Developed with node.js ~0.12.0
