@@ -6,13 +6,11 @@ var _ = require('lodash');
 function Api(app) {
   this.app = app;
 
-  if (app.get('environment') === 'dev') {
-    this.apiKey = config.app.apiKey;
-  } else {
+  if (app.get('environment') === 'heroku') {
     this.apiKey = process.env.API_KEY;
+  } else {
+    this.apiKey = config.app.apiKey;
   }
-
-
   _.bindAll(this, 'syncData');
 }
 
