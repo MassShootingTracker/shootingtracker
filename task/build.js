@@ -10,7 +10,6 @@ var csso = require('gulp-csso');
 var expect = require('gulp-expect-file');
 var rename = require('gulp-rename');
 var rev = require('gulp-rev');
-var rimraf = require('gulp-rimraf');
 var streamify = require('gulp-streamify');
 var sass = require('gulp-sass');
 var uglify = require('gulp-uglify');

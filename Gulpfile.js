@@ -20,15 +20,10 @@ gulp.on('err', function (error) {
   });
 });
 
-
 // Tasks
 require('./task/build');
-//require('./task/image');
-//require('./task/routes');
 require('./task/run');
-//require('./task/test');
 require('./task/watch');
-
 
 // Default Task
 gulp.task('default', function(callback) {
@@ -38,5 +33,4 @@ gulp.task('default', function(callback) {
            'checkstyle',
            'test',
            callback);
-
 });
