@@ -13,10 +13,10 @@ var Converter = require('csvtojson').Converter;
 function GoogleDocs(app) {
   this.app = app || {};
 
-  if (app.get('environment') === 'dev') {
-    this.url = config['google-docs'].url;
-  } else {
+  if (app.get('environment') === 'heroku') {
     this.url = process.env.GOOGLE_DOC_URL;
+  } else {
+    this.url = config['google-docs'].url;
   }
 
   _.bindAll(this, 'refreshLocalData', 'getSheet', '_csvToJSON', '_writeJSONToFile');
@@ -94,8 +94,6 @@ GoogleDocs.prototype.refreshLocalData = function refreshLocalData() {
         daysSinceLastShooting: parseInt(daysSinceLastShooting),
         shootings: result
       }
-
-      _this.app.locals.data = data;
 
       return _this._writeJSONToFile(data);
     });
