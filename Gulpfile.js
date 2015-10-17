@@ -33,10 +33,12 @@ require('./task/watch');
 // Default Task
 gulp.task('default', function(callback) {
 
-  sequence('build',
-           'lint',
-           'checkstyle',
-           'test',
-           callback);
+  sequence(
+      'transpile',
+      'build',
+      'lint',
+      'checkstyle',
+      'test',
+      callback);
 
 });
