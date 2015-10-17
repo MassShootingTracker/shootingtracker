@@ -20,6 +20,8 @@ var sequence = require('run-sequence');
 var S = require('string');
 var source = require('vinyl-source-stream');
 var yargs = require('yargs').argv;
+var coffee = require('gulp-coffee');
+var debug = require('gulp-debug');
 
 var task = require('./index');
 
@@ -69,7 +71,6 @@ exports.bundleCSS = function bundleCSS(src, callback) {
     .on('end', callback);
 };
 
-
 exports.bundleJS = function bundleJS(bundler, entry) {
   return bundler.bundle()
     .on('error', gutil.log.bind(gutil, 'Browserify Error'))
@@ -78,7 +79,6 @@ exports.bundleJS = function bundleJS(bundler, entry) {
     .pipe(gulp.dest('.tmp/public/js'))
     .pipe(gulp.dest('public/js'));
 };
-
 
 exports.getSiteBundler = function getSiteBundler(entries, options) {
   /* jshint maxcomplexity:8 */
@@ -117,6 +117,7 @@ exports.getSiteBundler = function getSiteBundler(entries, options) {
 gulp.task('build', function(callback) {
 
   var build = [
+      'build:site:transpile',
     'build:site:image',
     'build:site:video',
     'build:site:font',
@@ -139,6 +140,15 @@ gulp.task('build', function(callback) {
   return sequence.apply(this, args);
 
 });
+
+
+gulp.task('build:site:transpile', function(){
+  return gulp.src(['**/*.coffee','!node_modules/**']).pipe(
+      debug({title: 'coffee files:'})).pipe(
+      coffee().on('error', gutil.log)).pipe(
+      debug({title: 'transpiled files:'})).pipe(
+      gulp.dest('.'))
+})
 
 gulp.task('build:site:image', function () {
   return gulp.src(['client/img/**/*.*'], {base: 'client/img'})
