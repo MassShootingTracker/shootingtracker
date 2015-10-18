@@ -4,14 +4,14 @@
   "description": "website for tracking mass shootings in America",
   "repository": {
     "type": "git",
-    "url": "git@github.com:MassShootingTracker/shootingtracker.git"
+    "url": "git+https://github.com/MassShootingTracker/shootingtracker.git"
   },
   "main": "index.js",
   "engines": {
     "node": "~0.12.0"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
     "start": "gulp run",
     "postinstall": "gulp build"
   },
@@ -72,6 +72,7 @@
     "minimist": "^1.2.0",
     "mocha": "^1.21.4",
     "moment": "^2.10.6",
+    "mongodb": "^2.0.46",
     "mongoose": "^4.1.11",
     "mongoose-redis-cache": "0.0.3",
     "nconf": "0.6.9",
@@ -79,6 +80,7 @@
     "on-finished": "^2.2.0",
     "pretty-hrtime": "^0.2.1",
     "reactify": "^1.1.1",
+    "redis": "^2.2.5",
     "redis-mock": "^0.3.0",
     "request": "^2.64.0",
     "run-sequence": "^0.3.6",
@@ -87,10 +89,6 @@
     "watchify": "^3.4.0",
     "when": "^3.3.1",
     "yargs": "^1.2.1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/MassShootingTracker/shootingtracker.git"
   },
   "keywords": [
     "mass",

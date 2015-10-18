@@ -9,6 +9,7 @@ var exphbs  = require('express-handlebars');
 var Controllers = require('./controllers');
 var Services = require('./services');
 var argv = require('yargs').argv;
+var MongoClient = require('mongodb').MongoClient
 
 var shootingData = require('./data/shootings.json');
 
@@ -47,9 +48,12 @@ if (argv.refreshData) {
 }
 
 (argv.refreshData ? app.services.googledocs.refreshLocalData() : when.resolve())
+  .then(function(){
+    app.locals.data = argv.refreshData ? shootingData : require('./data/shootings.json');
+  })
   .then(function() {
 
-    app.locals.data = argv.refreshData ? shootingData : require('./data/shootings.json');
+
 
     var server = app.listen(app.get('port'), app.get('hostname'), function () {
 
