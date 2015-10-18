@@ -6,7 +6,6 @@ var Api = require('./api');
 function Index(app) {
   this.app = app;
 
-
   _.bindAll(this, 'home');
 }
 
