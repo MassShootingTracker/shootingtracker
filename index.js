@@ -12,8 +12,6 @@ var argv = require('yargs').argv;
 
 var shootingData = require('./data/shootings.json');
 
-exports.start = function start(environment) {
-
 var app = express();
 
 app.engine('.hbs', exphbs({
@@ -63,6 +61,4 @@ if (argv.refreshData) {
   })
   .catch(function(err) {
     console.error(err.stack);
-        console.log('error: ' + err.message);
-
   });

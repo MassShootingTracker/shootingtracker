@@ -18,6 +18,7 @@ Index.prototype.register = function() {
 }
 
 Index.prototype.home = function home(req, res, next) {
+  console.log("render index... for the moment, just year 2015")
   res.render('index');
 }
 
