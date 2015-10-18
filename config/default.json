@@ -1,1 +1,10 @@
-{}
+{
+  "app": {
+    "port": 5000,
+    "hostname": "127.0.0.1",
+    "apiKey": "xxxx"
+  },
+  "google-docs": {
+    "url":"https://docs.google.com/spreadsheets/d/1pv0Bdk6B0etAeyY8o1PkyW2t8103hmCxSgqMZFmjy4A/pub?output=csv"
+  }
+}

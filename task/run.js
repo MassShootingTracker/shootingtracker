@@ -8,42 +8,32 @@ var sequence = require('run-sequence');
 var yargs = require('yargs').argv;
 
 var task = require('./index');
-
-var app = require('../index');
-
-var debugServer = !!(yargs['debug-server'] || yargs.debug);
-
-var runTasks = _.filter([
-  'run:nodemon',
-  debugServer ? 'run:inspector' : ''
-]);
-
+var debugServer = !!yargs.debug;
 
 gulp.task('run', function(callback) {
-  sequence(runTasks, callback);
+  sequence(['run:nodemon'], callback);
 });
-
-
-gulp.task('run:inspector', shell.task('node-inspector', {
-  ignoreErrors: true
-}));
-
 
 gulp.task('run:nodemon', function(callback) {
 
+  var scriptArgs = task.getConfigFiles();
+
+  if (yargs.refreshData) {
+    scriptArgs.push(['--refreshData']);
+  }
+
   var stream = nodemon({
-    args: task.getConfigFiles(),
+    args: scriptArgs,
     ignore: 'data/*',
     ext: 'js json hbs',
     nodeArgs: debugServer ? ['--debug'] : [],
-    script: './run.js',
+    script: './index.js',
     verbose: !!(yargs.verbose || yargs.V)
   });
 
   stream.on('end', callback);
 
 });
-
 
 gulp.task('run:all', function(callback) {
   /*jshint unused:false */
@@ -52,7 +42,7 @@ gulp.task('run:all', function(callback) {
            'build:site:style',
            function() {
 
-    sequence.apply(this, runTasks);
+    sequence.apply(this, 'run:nodemon');
     sequence('watch:all');
 
   });
@@ -62,15 +52,14 @@ gulp.task('run:prod', function(callback) {
   /*jshint unused:false */
   sequence('build',
            function() {
-    app.start();
+    require('../index');
   });
 });
 
-
-gulp.task('run:fast', runTasks.concat([
+gulp.task('run:fast', [
+  'run:nodemon',
   'watch:fast'
-]));
-
+]);
 
 gulp.task('run:fast:build', function(callback) {
   /*jshint unused:false */
@@ -79,7 +68,7 @@ gulp.task('run:fast:build', function(callback) {
            'build:site:style',
            function() {
 
-    sequence.apply(this, runTasks);
+    sequence.apply(this, ['run:nodemon']);
     sequence('watch:fast');
 
   });

@@ -8,7 +8,6 @@ var _ = require('lodash');
 
 
 converter.on("end_parsed", function (jsonArray) {
-   console.log(jsonArray); //here is your result jsonarray
 
    jsonArray = _.map(jsonArray, function(dat) {
 
