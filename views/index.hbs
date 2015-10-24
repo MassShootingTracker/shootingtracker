@@ -17,66 +17,22 @@
       <div class="row mst-jumbotron-btns">
 
         <div class="col-xs-12 col-sm-3 center">
+          <a class="btn btn-block btn-success" href="/data"><i class="fa fa-database"></i>See the Data</a>
+        </div>
+        <div class="col-xs-12 col-sm-3 center">
           <a class="btn btn-block btn-danger" href="#"><i class="fa fa-share-alt"></i>Share this page</a>
         </div>
         <div class="col-xs-12 col-sm-3 center">
-          <a class="btn btn-block btn-danger" href="#"><i class="fa fa-twitter"></i>Follow us on Twitter</a>
+          <a class="btn btn-block btn-danger" href="https://twitter.com/GunsAreCool"><i class="fa fa-twitter"></i>Follow us on Twitter</a>
         </div>
         <div class="col-xs-12 col-sm-3 center">
-          <a class="btn btn-block btn-danger" href="#"><i class="fa fa-envelope"></i>Join our mailing list</a>
-        </div>
-        <div class="col-xs-12 col-sm-3 center">
-          <a class="btn btn-block btn-danger" href="#"><i class="fa fa-reddit"></i>Subscribe on Reddit</a>
+          <a class="btn btn-block btn-danger" href="https://reddit.com/r/GunsAreCool"><i class="fa fa-reddit"></i>Follow us on Reddit</a>
         </div>
 
       </div>
     </div>
 
-    <div class="mst-button-row">
+    {{>recentshootings}}
 
-        <a href="#" class="btn btn-info" data-toggle="modal" data-target="#submitShootingModal"><i class="fa fa-submit"></i>Report a mass shooting</a>
-
-        <a href="#" class="btn btn-default"><i class="fa fa-download"></i>Download the data</a>
-
-    </div>
-
-    <table class="table">
-      <thead>
-        <tr>
-          <th>Date</th>
-          <th>Location</th>
-          <th>Dead</th>
-          <th>Injured</th>
-          <th>Shooter's Name</th>
-          <th>Synopsis</th>
-          <th>News articles</th>
-        </tr>
-      </thead>
-      <tbody>
-        {{#each data.shootings}}
-        <tr>
-          <td>{{date}}</td>
-          <td>{{location}}</td>
-          <td>{{killed}}</td>
-          <td>{{wounded}}</td>
-          <td>{{name}}</td>
-          <td>{{synopsis}}</td>
-          <td>
-            <ol>
-            {{#each sources}}
-              <li>
-                <a target="_blank" href="{{this}}" title="{{this}}"><i class="fa fa-external-link"></i></a>
-              </li>
-            {{/each}}
-            </ol>
-          </td>
-        </tr>
-        {{/each}}
-
-      </tbody>
-
-    </table>
   </div>
 </div>
-
-{{>submitshooting}}
