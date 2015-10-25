@@ -29,6 +29,9 @@ try {
   if (process.env.OPENSHIFT_REDISURL != null) {
     conf.app.redis.url = process.env.OPENSHIFT_REDISURL;
   }
+  if (process.env.OPENSHIFT_GOOGLE_DOC_URL != null) {
+    conf.app['google-docs'].url = process.env.OPENSHIFT_GOOGLE_DOC_URL;
+  }
 } catch (e) {
   console.log('File "config/local.json" not found. Falling back to config file "config/default.json"');
   conf = require('./default.json');

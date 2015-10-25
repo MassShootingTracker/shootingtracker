@@ -8,7 +8,7 @@ expect = chai.expect
 sinon = require('sinon')
 path = require 'path'
 
-describe 'Redis & Mongo Integration', ->
+describe 'GoogleDocs / Redis / Mongo Integration', ->
 
   before (done) ->
     done()
@@ -76,9 +76,7 @@ describe 'Redis & Mongo Integration', ->
     )
 
   it 'should get data for 2015', (done)->
-    config = require(path.join(process.cwd(),'./config' ))
     dl = getDataLayer()
-    debugger
     dl.should.be
     dl.getByYear(2015).catch((err) ->
       throw err
@@ -86,6 +84,17 @@ describe 'Redis & Mongo Integration', ->
       shootings.should.be
       shootings.length.should.be.gt(200)
       shootings.length.should.be.lt(500)
+      done()
+    )
+
+  it 'should get the sheet data', (done)->
+    dl = getDataLayer()
+    dl.should.be
+    dl.pullSheetData().catch((err) ->
+      throw err
+    ).done((sheet) ->
+      sheet.should.be
+      sheet.length.should.be.gt(200)
       done()
     )
 
