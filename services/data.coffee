@@ -132,15 +132,9 @@ class Data
 
     return promise
 
-
   ###
     return value:
-    {
-      {"totalAllYears": 000},
-      {"2014": 111},
-      {"2015": 222},
-      {"hoursSince": 00}
-  }
+    { '2014': 24, '2015': 279, totalAllYears: 303, hoursSince: 327 }
   ###
   getTotals: =>
 
@@ -169,36 +163,39 @@ class Data
               getMongoConn().catch((err)-> reject(err)).then((dbconn) ->
 
                 logger.debug 'connected to mongo; proceeding'
-
-                currentYear = (new Date().getFullYear())
-                result = []
+                result = {}
 
                 Shooting.count().exec( (err, count) ->
                   if err?
                     reject(err)
                     return
 
-                  result.push(totalAllYears: count)
+                  result.totalAllYears = count
 
                   now = new moment()
 
+                  # find the hours since last shooting
                   # MyModel.find(query, fields, { skip: 10, limit: 5 }, function(err, results) { ... });
 
-                  Shooting.find().sort('-date').take(1).exec( (err, docs) ->
+                  Shooting.find(null, null, { limit: 1 }).sort('-date').exec( (err, docs) ->
+                    if err?
+                      reject(err)
+                      return
                     lastDate = docs[0].date
-                    duration = moment.duration(lastDate.diff(now))
-                    hours = duration.asHours()
-                    result.push(hoursSince: hours)
+                    duration = Math.floor(Math.abs( moment.duration(now.diff(lastDate)).asHours() ))
+                    result.hoursSince = duration
 
+                    # get totals for each year
+                    currentYear = (new Date().getFullYear())
                     for year in [startYear..currentYear]
                       do (year) ->
                         Shooting.count(date: {$gte: new Date(year, 1, 1), $lte: new Date(year, 12, 31)}).exec( (err, count) ->
                           if err?
                             reject(err)
+                            return
                           else
-                            result.push {year: year, count: count}
+                            result[year] = count
                             if (year == currentYear)
-
                               resolve(result)
                       )
                   )
