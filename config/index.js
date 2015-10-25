@@ -1,7 +1,16 @@
-var conf;
+var conf,def;
+var ld = require('lodash');
 
 try {
-  conf = require('./local.json');
+  try {
+    conf = require('./local.json');
+  } catch (e) {
+    // ignore
+  }
+
+  def = require('./default.json');
+  conf = ld.merge(conf, def);
+
   if (process.env.OPENSHIFT_APPPORT != null) {
     conf.app.port = process.env.OPENSHIFT_APPPORT;
   }

@@ -24,6 +24,9 @@ describe 'Redis & Mongo Integration', ->
 
   config = {}
 
+  errorHandler = (err) ->
+    throw err
+
   getDataLayer = ->
     config = require(path.join(process.cwd(),'./config' ))
     logger = new (require 'bunyan')({name: 'errors', level: 50})
@@ -58,6 +61,17 @@ describe 'Redis & Mongo Integration', ->
     dl.should.be
     dl.deleteRedisKey('2014').catch( (err) -> throw err).then( (result) ->
       result.should.be.ok
+      done()
+    )
+
+  it 'should get totals for all years', (done) ->
+    dl = getDataLayer()
+    dl.should.be
+    dl.getTotals().catch(errorHandler).then( (result) ->
+      result.should.have.property('2015')
+      result.should.have.property('2014')
+      result.should.have.property('totalAllYears')
+      result.should.have.property('hoursSince')
       done()
     )
 
