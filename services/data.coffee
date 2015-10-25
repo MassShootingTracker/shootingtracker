@@ -6,12 +6,17 @@ Shooting = require('.././data/schema/shooting')
 redis = require 'redis'
 moment = require 'moment'
 dayInSeconds = 24*60*60
+nodefn = require('when/node')
+request = require('request')
+Converter = require('csvtojson').Converter
 
 class Data
 
   constructor: (config, @logger) ->
     unless config?
       throw 'config is required!'
+
+    @googleSheetURL = config['google-docs'].url
 
     @redisPort = config.redis.port
     # mongodb://[username:password@]host1[:port1]
@@ -210,6 +215,7 @@ class Data
   updateFromCSV: (data) =>
     logger = @logger
     logger.trace "starting update from csv"
+    console.dir(data)
 
     unless data.shootings?
       throw "no shootings element found in CSV data"
@@ -283,10 +289,27 @@ class Data
 
     return promise
 
-  getSummary: () =>
-    @logger.trace "getting summary"
-    promise = w.promise (resolve, reject) ->
+  getSheet: (url) ->
+    unless  @googleSheetURL
+      throw 'no google docs url found in config, should be at config["google-docs"].url'
+    nodefn.lift(request)(uri: @googleSheetURL).then (result) ->
+      w.resolve result[0].body
 
-    return promise
+  csvToJSON:  (csvStr) ->
+    converter = new Converter({})
+    promise = w.promise (resolve, reject) ->
+      converter.fromString csvStr, (err, result) ->
+        if err
+          reject err
+        resolve result
+    promise
+
+  pullSheetData: =>
+    promise = w.promise (resolve, reject) =>
+      @getSheet().then((sheetStr) =>
+        @csvToJSON sheetStr
+      ).catch((err)-> reject(err)).then (result) =>
+        resolve(result)
+
 
 module.exports.Data = Data

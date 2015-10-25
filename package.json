@@ -11,7 +11,7 @@
     "node": "~0.12.0"
   },
   "scripts": {
-    "test": "mocha test/integration/redisMongo.js",
+    "test": "mocha test/integration/redisMongoDocs.js",
     "start": "gulp run",
     "postinstall": "gulp build"
   },
