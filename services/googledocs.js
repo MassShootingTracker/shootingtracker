@@ -9,7 +9,6 @@ var _ = require('lodash');
 var moment = require('moment');
 var Converter = require('csvtojson').Converter;
 var mongoUrl;
-var mongoose = require('mongoose');
 
 function GoogleDocs(app) {
   this.app = app || {};
@@ -76,7 +75,7 @@ GoogleDocs.prototype.refreshLocalData = function refreshLocalData() {
 
       result = _.sortBy(result, function (item) {
         return -1 * moment(new Date(item.date)).unix();
-      })
+      });
 
       var daysSinceLastShooting = moment(new Date(result[0].date)).fromNow().split(' ')[0];
 
@@ -87,7 +86,7 @@ GoogleDocs.prototype.refreshLocalData = function refreshLocalData() {
         item.sources = item.sources_csv.split(',');
         item.sources = _.map(item.sources, function (src) {
           return src.trim();
-        })
+        });
 
         return item;
       });
@@ -98,69 +97,7 @@ GoogleDocs.prototype.refreshLocalData = function refreshLocalData() {
         shootings:result
       }
 
-      mongoose.connect(mongoUrl);
-      var db = mongoose.connection;
-      var Shooting = require('.././data/schema/shooting')
-      db.on('error', console.error.bind(console, 'connection error:'));
-      db.once('open', function (callback) {
-        console.log('connected to mongo; proceeding')
-        var d, i, len, ref;
 
-        ref = data.shootings;
-        var total = ref.length;
-        var checked = 0;
-        var n = 0;
-
-        for (i = 0, len = ref.length; i < len; i++) {
-          d = ref[i];
-          var entry = new Shooting();
-          entry.date = new Date(d.date);
-          entry.perpetrators = [{name:d.name}];
-          entry.killed = d.killed;
-          entry.city = d.city;
-          entry.wounded = d.wounded;
-          entry.city = d.location.split(',')[0];
-          entry.state = (d.location.split(',')[1]).trim();
-          entry.sources = d.sources;
-
-          // find any entries on this data with the same city and state and at least one matching source
-          // if found, delete and re-create
-          // else just save each one
-          var upsert = function (entry) {
-
-            Shooting.find({
-              city:entry.city,
-              state:entry.state,
-              date:entry.date,
-              sources:{$in:entry.sources}
-            }).exec(function (err, shooting) {
-              // if it exists, delete it
-              if (err) throw 'error in Shooting find: ' + err;
-              else if (shooting.length > 1) {
-                console.dir(entry) // probably needs an IIFE
-                throw 'found multiple entries! (this should be very rare at best)'
-              }
-              else if (shooting.length > 0) {
-                Shooting.remove({_id:shooting[0]._id}, function (err, result) {
-                  entry.save()
-                });
-              }
-              else {
-                ++n;
-                entry.save();
-              }
-              ++checked;
-              if (checked == total) {
-                console.log("done writing data to Mongo (" + n + " new records)");
-                _this._writeJSONToFile(data);
-              }
-            })
-          };
-
-          upsert(entry);
-
-        }
-      });
     });
 };
 
