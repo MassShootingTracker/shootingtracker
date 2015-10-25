@@ -43,6 +43,26 @@ class Data
 
     return promise
 
+  getMongoConn: =>
+
+    mongoose.connect(@mongoURL)
+    logger = @logger
+
+    promise = w.promise (resolve, reject) =>
+      if @mongoConn?
+        resolve(@mongoConn)
+      else
+        db = mongoose.connection
+        db.on 'error', ->
+          reject(arguments)
+
+        db.once 'open',  =>
+          logger.debug 'connected to mongo; proceeding'
+          @mongoConn = mongoose.connection
+          resolve(mongoose.connection)
+
+    return promise
+
   deleteRedisKey: (key) =>
     getConn = @getRedisConn
     promise = w.promise (resolve, reject) ->
@@ -53,24 +73,6 @@ class Data
           else resolve(true)
         )
       )
-    debugger
-    return promise
-
-  getMongoConn: =>
-
-    mongoose.connect(@mongoURL)
-    logger = @logger
-
-    promise = w.promise (resolve, reject) ->
-
-      db = mongoose.connection
-      db.on 'error', ->
-        reject(arguments)
-
-      db.once 'open',  ->
-        logger.debug 'connected to mongo; proceeding'
-        resolve(mongoose.connection)
-
     return promise
 
   getRedisKeys: () =>
@@ -130,6 +132,84 @@ class Data
 
     return promise
 
+
+  ###
+    return value:
+    {
+      {"totalAllYears": 000},
+      {"2014": 111},
+      {"2015": 222},
+      {"hoursSince": 00}
+  }
+  ###
+  getTotals: =>
+
+    promise = w.promise (resolve, reject) =>
+      logger = @logger
+      logger.debug 'connecting to redis'
+      years = new moment()
+      key = 'totals'
+      startYear = 2014 # the year we started collecting data
+      getMongoConn = @getMongoConn
+
+      @getRedisConn().catch((err)-> reject(err)).then((redisClient) ->
+
+        redisClient.get(key, (err, reply) ->
+          if err?
+            logger.error err
+            reject(err)
+          else
+            reply = JSON.parse(reply)
+            if reply? and reply.length? and reply.length > 0
+              ### found in redis, return that ###
+              logger.debug 'found in redis, returning'
+              resolve(reply)
+            else
+              ### redis returned an empty set, get from mongo ###
+              getMongoConn().catch((err)-> reject(err)).then((dbconn) ->
+
+                logger.debug 'connected to mongo; proceeding'
+
+                currentYear = (new Date().getFullYear())
+                result = []
+
+                Shooting.count().exec( (err, count) ->
+                  if err?
+                    reject(err)
+                    return
+
+                  result.push(totalAllYears: count)
+
+                  now = new moment()
+
+                  # MyModel.find(query, fields, { skip: 10, limit: 5 }, function(err, results) { ... });
+
+                  Shooting.find().sort('-date').take(1).exec( (err, docs) ->
+                    lastDate = docs[0].date
+                    duration = moment.duration(lastDate.diff(now))
+                    hours = duration.asHours()
+                    result.push(hoursSince: hours)
+
+                    for year in [startYear..currentYear]
+                      do (year) ->
+                        Shooting.count(date: {$gte: new Date(year, 1, 1), $lte: new Date(year, 12, 31)}).exec( (err, count) ->
+                          if err?
+                            reject(err)
+                          else
+                            result.push {year: year, count: count}
+                            if (year == currentYear)
+
+                              resolve(result)
+                      )
+                  )
+                )
+          )
+        )
+      )
+
+    return promise
+
+
   updateFromCSV: (data) =>
     logger = @logger
     logger.trace "starting update from csv"
@@ -186,7 +266,8 @@ class Data
                 else if shooting.length > 1
                   console.dir entry
                   # probably needs an IIFE
-                  throw 'found multiple entries! (this should be very rare at best)'
+                  logger.fatal 'found multiple entries! (this should be very rare at best)'
+                  logger.fatal (entry: shooting )
                 else if shooting.length > 0
                   Shooting.remove { _id: shooting[0]._id }, (err, result) ->
                     entry.save()
