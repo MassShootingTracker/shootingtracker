@@ -21,29 +21,52 @@
           <th>News articles</th>
         </tr>
       </thead>
-      <tbody>
-        {{#each data.shootings}}
-        <tr>
-          <td>{{date}}</td>
-          <td>{{location}}</td>
-          <td>{{killed}}</td>
-          <td>{{wounded}}</td>
-          <td>{{name}}</td>
-          <td>{{synopsis}}</td>
-          <td>
-            <ol>
-            {{#each sources}}
-              <li>
-                <a target="_blank" href="{{this}}" title="{{this}}"><i class="fa fa-external-link"></i></a>
-              </li>
-            {{/each}}
-            </ol>
-          </td>
-        </tr>
-        {{/each}}
 
-      </tbody>
+{{!--
+sample record:
 
-    </table>
-  </div>
+{ _id: '56241713111497a82e69a1d5',
+state: 'GA',
+city: 'Savannah',
+__v: 0,
+flagged: [],
+sources: [ 'http://savannahnow.com/crime/2015-01-02/police-1-dead-4-injured-overnight-savannah-shooting' ],
+categories: [],
+comments: [],
+wounded: 4,
+killed: 1,
+perpetrators: [ { name: 'Unknown', _id: '56241713111497a82e69a1d6' } ],
+date: '2015-01-02T08:00:00.000Z' }
+
+--}}
+
+<tbody>
+ {{#each data}}
+ <tr>
+   <td>{{date}}</td>
+   <td>{{city}},{{state}}</td>
+   <td>{{killed}}</td>
+   <td>{{wounded}}</td>
+   <td>
+     {{#each perpetrators}}
+     <div>{{name}}</div>
+     {{/each}}
+   </td>
+   <td>{{synopsis}}</td>
+   <td>
+     <ol>
+     {{#each sources}}
+       <li>
+         <a target="_blank" href="{{this}}" title="{{this}}"><i class="fa fa-external-link"></i></a>
+       </li>
+     {{/each}}
+     </ol>
+   </td>
+ </tr>
+ {{/each}}
+
+</tbody>
+
+</table>
+</div>
 </div>

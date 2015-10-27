@@ -1,9 +1,14 @@
 {{>navbar}}
 
+
+{{!--
+{ '2014': 24, '2015': 279, totalAllYears: 303, daysSince: 15 }
+
+--}}
 <div class="container-fluid">
   <div class="container mst-container-main">
     <div class="jumbotron">
-      <h1 class="center">Number of mass shootings in America this year: <strong>{{data.numShootingsThisYear}}</strong></h1>
+      <h1 class="center">Number of mass shootings in America this year: <strong>{{data.currentYear}}</strong></h1>
 
       <p class="mst-shooting-definition">
         We define a mass shooting to be when 4 or more people are shot in a single burst of violence.
@@ -11,7 +16,7 @@
         Fighting apathy requires awareness.
         Learn more about why the government and the media's definition of "mass shooting" <a href="/about">is wrong...</a>
       </p>
-      <h3 class="center">{{data.daysSinceLastShooting}} days since the last mass shooting</h3>
+      <h3 class="center">{{data.daysSince}} days since the last mass shooting</h3>
       <h3 class="center">Expected time until next mass shooting: 2 days, 13 hours, 20 minutes, 11 seconds</h3>
 
       <div class="row mst-jumbotron-btns">
