@@ -1,0 +1,75 @@
+<div class="modal fade" id="submitShootingModal">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">Submit a mass shooting report</h4>
+      </div>
+      <div class="modal-body">
+        <p>
+          The mass shooting tracker is a volunteer run, crowd sourced tool. While we have volunteers scouring google for news reports,
+          we don't catch everything. Submit a documented report, and we will review it and merge it into our database.
+        </p>
+        <p>
+          To fight spam, we ask that you submit a valid email address. We will then send you a link so that you can verify your address, and we can follow up with questions if neccessary. Please consider joining our mailing list if you want to be kept up to date.
+        </p>
+        <p>
+          Thanks for particpating! Your involvement is crucial -The MST team
+        </p>
+
+        <form>
+          <div class="form-group">
+            <label for="inputEmail">Your email address *</label>
+            <input type="email" class="form-control" id="inputEmail" placeholder="Email">
+          </div>
+          <div class="checkbox">
+            <label>
+              <input type="checkbox"> Sign me up for the mailing list
+            </label>
+          </div>
+          <h4>Info about the shooting:</h4>
+          <div class="form-group">
+            <label for="inputEmail">Date of incident *</label>
+            <input type="date" class="form-control" id="inputDate" placeholder="Date">
+          </div>
+          <div class="form-group row">
+            <div class="form-group col-xs-6">
+              <label for="inputCity">City *</label>
+              <input type="text" class="form-control" id="inputCity" placeholder="City">
+            </div>
+            <div class="form-group  col-xs-6">
+              <label for="inputState">State *</label>
+              <input type="text" class="form-control" id="inputState" placeholder="State">
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="inputWounded">Shooter's name</label>
+            <input type="text" class="form-control" id="inputWounded" placeholder="">
+          </div>
+          <div class="form-group row">
+            <div class="form-group col-xs-6">
+              <label for="inputKilled">Number killed *</label>
+              <input type="number" class="form-control" id="inputKilled" placeholder="1">
+            </div>
+            <div class="form-group col-xs-6">
+              <label for="inputWounded">Number wounded *</label>
+              <input type="number" class="form-control" id="inputWounded" placeholder="1">
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="inputSources">Urls to news articles *</label>
+            <textarea type="text" class="form-control" id="inputSources" placeholder="List of urls to news articles about the incident"></textarea>
+          </div>
+          <div class="form-group">
+            <label for="inputSynopsis">Description of incident</label>
+            <textarea type="text" class="form-control" id="inputSynopsis" placeholder="Short description of incident"></textarea>
+          </div>
+        </form>
+        <p>* required</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary">Submit</button>
+      </div>
+    </div>
+  </div>
+</div>

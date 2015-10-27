@@ -12,7 +12,7 @@ var mongoUrl;
 
 function GoogleDocs(app) {
 
-  throw('this code has moved to /services/data.js');
+  //throw('this code has moved to /services/data.js');
   this.app = app || {};
 
   if (app.get('environment') === 'heroku') {
@@ -23,7 +23,7 @@ function GoogleDocs(app) {
     mongoUrl = config['mongo'].url;
   }
 
-  _.bindAll(this, 'refreshLocalData', 'getSheet', '_csvToJSON', '_writeJSONToFile');
+  _.bindAll(this);
 }
 
 module.exports = GoogleDocs;

@@ -5,21 +5,19 @@ var express = require('express');
 var bodyParser = require('body-parser');
 var methodOverride = require('method-override');
 var config = require('./config');
-var exphbs  = require('express-handlebars');
+var exphbs = require('express-handlebars');
+
 var Controllers = require('./controllers');
 var Services = require('./services');
 var argv = require('yargs').argv;
-var MongoClient = require('mongodb').MongoClient
-
-var shootingData = require('./data/shootings.json');
 
 var app = express();
 
 app.engine('.hbs', exphbs({
-  extname: '.hbs',
-  layoutsDir: 'views/layouts/',
-  partialsDir: 'views/partials/',
-  defaultLayout: 'main'
+  extname:'.hbs',
+  layoutsDir:'views/layouts/',
+  partialsDir:'views/partials/',
+  defaultLayout:'main'
 }));
 
 app.set('view engine', '.hbs');
@@ -28,7 +26,7 @@ app.set('hostname', (process.env.HOSTNAME || config.app.hostname));
 
 app.use(express.static('public'));
 
-app.use(bodyParser.urlencoded({extended: true}));
+app.use(bodyParser.urlencoded({extended:true}));
 app.use(bodyParser.json());
 
 app.use(methodOverride());
@@ -36,7 +34,7 @@ app.use(methodOverride());
 (new Controllers(app)).register();
 (new Services(app));
 
-app.use(function(err, req, res, next) {
+app.use(function (err, req, res, next) {
   if (err) {
     console.error(err.stack);
     res.status(500).send('Internal server error');
@@ -48,12 +46,10 @@ if (argv.refreshData) {
 }
 
 (argv.refreshData ? app.services.googledocs.refreshLocalData() : when.resolve())
-  .then(function(){
-    app.locals.data = argv.refreshData ? shootingData : require('./data/shootings.json');
+  .then(function () {
+    return; // maybe build the datalayer here?
   })
-  .then(function() {
-
-
+  .then(function () {
 
     var server = app.listen(app.get('port'), app.get('hostname'), function () {
 
@@ -63,6 +59,6 @@ if (argv.refreshData) {
       console.log('App listening at http://%s:%s', host, port);
     });
   })
-  .catch(function(err) {
+  .catch(function (err) {
     console.error(err.stack);
   });

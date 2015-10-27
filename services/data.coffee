@@ -5,10 +5,11 @@ mongoose = require('mongoose')
 Shooting = require('.././data/schema/shooting')
 redis = require 'redis'
 moment = require 'moment'
-dayInSeconds = 24*60*60
+redisTTL = 1*60*60
 nodefn = require('when/node')
 request = require('request')
 Converter = require('csvtojson').Converter
+ld = require 'lodash'
 
 class Data
 
@@ -28,7 +29,7 @@ class Data
 
     @mongoURL = "mongodb://#{userpass}#{config.mongo.url}"
     unless @logger?
-      @logger = (require 'bunyan')({name: 'mst-data'})
+      @logger = (require 'bunyan')({name: 'mst-data', level: (config.logging?.level? or 10)})
 
   getRedisConn: =>
 
@@ -62,7 +63,7 @@ class Data
           reject(arguments)
 
         db.once 'open',  =>
-          logger.debug 'connected to mongo; proceeding'
+          logger.trace 'connected to mongo; proceeding'
           @mongoConn = mongoose.connection
           resolve(mongoose.connection)
 
@@ -70,6 +71,7 @@ class Data
 
   deleteRedisKey: (key) =>
     getConn = @getRedisConn
+    @logger.debug "deleting redis key #{key}"
     promise = w.promise (resolve, reject) ->
       getConn().catch((err)-> reject(err)).then((redisClient) ->
         redisClient.del(key, (err) ->
@@ -82,6 +84,7 @@ class Data
 
   getRedisKeys: () =>
     promise = w.promise (resolve, reject) =>
+      @logger.debug "getting all redis keys"
 
       @getRedisConn().then( (redisClient) ->
         redisClient.keys('*', (err, keys) ->
@@ -99,7 +102,7 @@ class Data
     getMongoConn = @getMongoConn
 
     promise = w.promise (resolve, reject) =>
-      logger.debug 'connecting to redis'
+      logger.trace 'connecting to redis'
 
       @getRedisConn().catch((err)-> reject(err)).then((redisClient) ->
 
@@ -116,7 +119,7 @@ class Data
             else
               ### redis returned an empty set, get from mongo ###
               getMongoConn().catch((err)-> reject(err)).then((dbconn) ->
-                logger.debug 'connected to mongo; proceeding'
+                logger.trace "pulling by year from mongo"
 
                 #  moment("2014 04 25", "YYYY MM DD");
                 begin = moment("#{year} Jan 01", 'YYYY mmm DD')
@@ -128,7 +131,7 @@ class Data
                   else
                     ### store in redis with a one day TTL ###
                     redisClient.set(year, JSON.stringify(shootings))
-                    redisClient.expire(year, dayInSeconds)
+                    redisClient.expire(year, redisTTL)
                     resolve(shootings)
                 )
               )
@@ -139,7 +142,7 @@ class Data
 
   ###
     return value:
-    { '2014': 24, '2015': 279, totalAllYears: 303, hoursSince: 327 }
+    { '2014': 24, '2015': 279, totalAllYears: 303, daysSince: 2 }
   ###
   getTotals: =>
 
@@ -158,16 +161,16 @@ class Data
             logger.error err
             reject(err)
           else
-            reply = JSON.parse(reply)
-            if reply? and reply.length? and reply.length > 0
+            if reply? and (reply != "[]")
               ### found in redis, return that ###
-              logger.debug 'found in redis, returning'
-              resolve(reply)
+              replyAsObj = JSON.parse(reply)
+              logger.debug 'totals found in redis, returning'
+              resolve(replyAsObj)
             else
+              logger.debug "didn't find totals in redis; pulling fresh"
               ### redis returned an empty set, get from mongo ###
               getMongoConn().catch((err)-> reject(err)).then((dbconn) ->
 
-                logger.debug 'connected to mongo; proceeding'
                 result = {}
 
                 Shooting.count().exec( (err, count) ->
@@ -187,8 +190,8 @@ class Data
                       reject(err)
                       return
                     lastDate = docs[0].date
-                    duration = Math.floor(Math.abs( moment.duration(now.diff(lastDate)).asHours() ))
-                    result.hoursSince = duration
+                    duration = Math.floor(Math.abs( moment.duration(now.diff(lastDate)).asDays() ))
+                    result.daysSince = duration
 
                     # get totals for each year
                     currentYear = (new Date().getFullYear())
@@ -201,6 +204,8 @@ class Data
                           else
                             result[year] = count
                             if (year == currentYear)
+                              redisClient.set(key, JSON.stringify(result))
+                              redisClient.expire(key, redisTTL)
                               resolve(result)
                       )
                   )
@@ -215,7 +220,6 @@ class Data
   updateFromCSV: (data) =>
     logger = @logger
     logger.trace "starting update from csv"
-    console.dir(data)
 
     unless data.shootings?
       throw "no shootings element found in CSV data"
@@ -228,7 +232,7 @@ class Data
         reject(arguments)
 
       db.once 'open', (callback) ->
-        console.log 'connected to mongo; proceeding'
+        logger.debug 'connected to mongo; pushing new values into db'
         d = undefined
         i = undefined
         len = undefined
@@ -267,7 +271,6 @@ class Data
                 if err
                   reject(err)
                 else if shooting.length > 1
-                  console.dir entry
                   # probably needs an IIFE
                   logger.fatal 'found multiple entries! (this should be very rare at best)'
                   logger.fatal (entry: shooting )

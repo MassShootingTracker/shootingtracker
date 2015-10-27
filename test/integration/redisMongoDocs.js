@@ -88,7 +88,7 @@ describe('GoogleDocs / Redis / Mongo Integration', function() {
       result.should.have.property('2015');
       result.should.have.property('2014');
       result.should.have.property('totalAllYears');
-      result.should.have.property('hoursSince');
+      result.should.have.property('daysSince');
       return done();
     });
   });
