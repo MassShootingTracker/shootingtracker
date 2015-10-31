@@ -18,11 +18,9 @@
 
 `http://127.0.0.1:5000`
 
-### Refresh data from google docs on app start
+### Refresh data from google docs
 
-The app pulls shooting data from `data/shootings.json`. To tell the app to repopulate this file from google docs before the app starts, use the flag `--refreshData`
-
-`gulp run --refreshData` or `node index.js --refreshData`
+From a bash command line: `curl --data "key=[api key from config]" http://[url]:[port]/update` when the site is running. 
 
 ### Debugging:
 
