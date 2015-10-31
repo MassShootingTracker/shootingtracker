@@ -41,7 +41,7 @@ Index.prototype.register = function () {
           res.status(500).send('Failed');
           throw err;
         }).then(function (results) {
-          logger.debug({ csv_update_results: results });
+          logger.debug("new record count", { c: results });
         })
       }).done(function (results) {
         res.status(200).send('Done')

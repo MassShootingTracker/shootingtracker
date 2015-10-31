@@ -350,7 +350,7 @@ class Data
       @getSheet().then((sheetStr) =>
         @csvToJSON sheetStr
       ).catch((err)-> reject(err)).then (result) =>
-
+        @logger.debug "data pull complete"
         resolve(result)
 
 
