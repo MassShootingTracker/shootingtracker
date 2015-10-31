@@ -466,6 +466,7 @@ Data = (function() {
         })["catch"](function(err) {
           return reject(err);
         }).then(function(result) {
+          _this.logger.debug("data pull complete");
           return resolve(result);
         });
       };
