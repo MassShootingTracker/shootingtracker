@@ -221,8 +221,10 @@ class Data
     logger = @logger
     logger.trace "starting update from csv"
 
-    unless data.shootings?
+    unless data?
       throw "no shootings element found in CSV data"
+
+    console.dir data: data
 
     mongoose.connect(@mongoURL)
 
@@ -236,24 +238,48 @@ class Data
         d = undefined
         i = undefined
         len = undefined
-        ref = data.shootings
-        total = data.shootings.length
+        ref = data
+        total = data.length
         checked = 0
         n = 0
         i = 0
         len = ref.length
 
         while i < len
+
+          ###
+
+          sample:
+          { date: '9/20/2015',
+           name: 'Unknown',
+           killed: 0,
+           wounded: 6,
+           city: 'Tulsa',
+           state: 'OK',
+           synopsis: '',
+           guns_info: '',
+           other_info: '',
+           sources_csv: 'http://www.newson6.com/story/30072412/six-shot-outside-tulsa-nightclub' },
+
+          ###
           d = ref[i]
           entry = new Shooting
           entry.date = new Date(d.date)
-          entry.perpetrators = [ { name: d.name } ]
           entry.killed = d.killed
           entry.city = d.city
           entry.wounded = d.wounded
-          entry.city = d.location.split(',')[0]
-          entry.state = d.location.split(',')[1].trim()
-          entry.sources = d.sources
+          entry.city = d.city
+          entry.state = d.state
+
+          if d.sources_csv.indexOf(',') > -1
+            entry.sources = d.sources_csv.split(',')
+          else
+            entry.sources = d.sources_csv
+
+          if d.name.indexOf(';') > -1
+            d.name.split(';').forEach( (p) -> entry.perpetrators.push({name: p}))
+          else
+            entry.perpetrators = [{name: d.name}]
 
           ###
            find any entries on this data with the same city and state and at least one matching source
