@@ -77,7 +77,7 @@ Index.prototype.datapage = function datapage(req, res, next) {
   dataLayer.getByYear(+req.params.year).then(function (data) {
 
     data.map(function (x) {
-      x.date = new moment(x.data).format("MM/DD/YYYY")
+      x.date = new moment(x.date).format("MM/DD/YYYY")
     });
     app.locals.data = data;
     //console.dir(data[0])
