@@ -71,7 +71,7 @@ class Data
 
   deleteRedisKey: (key) =>
     getConn = @getRedisConn
-    @logger.debug "deleting redis key #{key}"
+    @logger.debug "deleting redis key '#{key}'"
     promise = w.promise (resolve, reject) ->
       getConn().catch((err)-> reject(err)).then((redisClient) ->
         redisClient.del(key, (err) ->
@@ -117,11 +117,12 @@ class Data
               logger.debug 'found in redis, returning'
               resolve(reply)
             else
+              logger.trace 'not found in redis'
               ### redis returned an empty set, get from mongo ###
               getMongoConn().catch((err)-> reject(err)).then((dbconn) ->
                 logger.trace "pulling by year from mongo"
 
-                #  moment("2014 04 25", "YYYY MM DD");
+                #  moment("2014 Apr 25", "YYYY mmm DD");
                 begin = moment("#{year} Jan 01", 'YYYY mmm DD')
                 end = moment("#{+year + 1} Jan 01", 'YYYY mmm DD')
 
@@ -129,6 +130,7 @@ class Data
                   if err?
                     reject(err)
                   else
+                    logger.trace "got shootings for year; storing in redis"
                     ### store in redis with a one day TTL ###
                     redisClient.set(year, JSON.stringify(shootings))
                     redisClient.expire(year, redisTTL)
@@ -220,11 +222,12 @@ class Data
   updateFromCSV: (data) =>
     logger = @logger
     logger.trace "starting update from csv"
+    yearsInCSV = []
+    deleteRedisKey = @deleteRedisKey
 
     unless data?
       throw "no shootings element found in CSV data"
 
-    console.dir data: data
 
     mongoose.connect(@mongoURL)
 
@@ -281,6 +284,8 @@ class Data
           else
             entry.perpetrators = [{name: d.name}]
 
+
+          yearsInCSV.push( entry.date.getFullYear() )
           ###
            find any entries on this data with the same city and state and at least one matching source
            if found, delete and re-create
@@ -310,10 +315,16 @@ class Data
                 ++checked
                 if checked == total
                   logger.warn 'done writing data to Mongo (' + n + ' new records)'
+                  logger.info 'deleting redis keys'
+                  for year in ld.uniq(yearsInCSV)
+                    deleteRedisKey(''+year)
+                  deleteRedisKey('totals')
+                  logger.warn 'deleted redis keys'
                   resolve(n)
               )
 
           upsert entry
+
           i++
 
     return promise
@@ -335,9 +346,11 @@ class Data
 
   pullSheetData: =>
     promise = w.promise (resolve, reject) =>
+      @logger.debug "pulling data from " + @googleSheetURL
       @getSheet().then((sheetStr) =>
         @csvToJSON sheetStr
       ).catch((err)-> reject(err)).then (result) =>
+
         resolve(result)
 
 

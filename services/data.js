@@ -110,7 +110,7 @@ Data = (function() {
   Data.prototype.deleteRedisKey = function(key) {
     var getConn, promise;
     getConn = this.getRedisConn;
-    this.logger.debug("deleting redis key " + key);
+    this.logger.debug("deleting redis key '" + key + "'");
     promise = w.promise(function(resolve, reject) {
       return getConn()["catch"](function(err) {
         return reject(err);
@@ -169,6 +169,7 @@ Data = (function() {
                 logger.debug('found in redis, returning');
                 return resolve(reply);
               } else {
+                logger.trace('not found in redis');
 
                 /* redis returned an empty set, get from mongo */
                 return getMongoConn()["catch"](function(err) {
@@ -187,6 +188,7 @@ Data = (function() {
                     if (err != null) {
                       return reject(err);
                     } else {
+                      logger.trace("got shootings for year; storing in redis");
 
                       /* store in redis with a one day TTL */
                       redisClient.set(year, JSON.stringify(shootings));
@@ -301,15 +303,14 @@ Data = (function() {
   };
 
   Data.prototype.updateFromCSV = function(data) {
-    var logger, promise;
+    var deleteRedisKey, logger, promise, yearsInCSV;
     logger = this.logger;
     logger.trace("starting update from csv");
+    yearsInCSV = [];
+    deleteRedisKey = this.deleteRedisKey;
     if (data == null) {
       throw "no shootings element found in CSV data";
     }
-    console.dir({
-      data: data
-    });
     mongoose.connect(this.mongoURL);
     promise = w.promise(function(resolve, reject) {
       var db;
@@ -372,6 +373,7 @@ Data = (function() {
               }
             ];
           }
+          yearsInCSV.push(entry.date.getFullYear());
 
           /*
            find any entries on this data with the same city and state and at least one matching source
@@ -387,6 +389,7 @@ Data = (function() {
                 $in: entry.sources
               }
             }).exec(function(err, shooting) {
+              var j, len1, ref1, year;
               if (err) {
                 reject(err);
               } else if (shooting.length > 1) {
@@ -407,6 +410,14 @@ Data = (function() {
               ++checked;
               if (checked === total) {
                 logger.warn('done writing data to Mongo (' + n + ' new records)');
+                logger.info('deleting redis keys');
+                ref1 = ld.uniq(yearsInCSV);
+                for (j = 0, len1 = ref1.length; j < len1; j++) {
+                  year = ref1[j];
+                  deleteRedisKey('' + year);
+                }
+                deleteRedisKey('totals');
+                logger.warn('deleted redis keys');
                 return resolve(n);
               }
             });
@@ -449,6 +460,7 @@ Data = (function() {
     var promise;
     return promise = w.promise((function(_this) {
       return function(resolve, reject) {
+        _this.logger.debug("pulling data from " + _this.googleSheetURL);
         return _this.getSheet().then(function(sheetStr) {
           return _this.csvToJSON(sheetStr);
         })["catch"](function(err) {
