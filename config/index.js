@@ -32,10 +32,21 @@ try {
   if (process.env.OPENSHIFT_GOOGLE_DOC_URL != null) {
     conf.app['google-docs'].url = process.env.OPENSHIFT_GOOGLE_DOC_URL;
   }
+  if (process.env.OPENSHIFT_LOGGINGPATH != null) {
+    conf.app.loggingPath = process.env.OPENSHIFT_LOGGINGPATH;
+  }
 
-  conf.logger = new (require('bunyan'))({
-    name: 'errors',
-    level: 50
+  conf.logger = (require('bunyan')).createLogger({
+    name: "mst",
+    streams: [
+      {
+        level: "debug",
+        stream: process.stdout
+      }, {
+        level: "error",
+        path: (conf.app.loggingPath  || "/var/tmp/mst-error.log")
+      }
+    ]
   });
 
 } catch (e) {
