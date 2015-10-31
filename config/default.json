@@ -4,7 +4,7 @@
     "apiKey": "fkjnwkj2nk3r43tklnf4al"
   },
   "google-docs": {
-    "url": "https://docs.google.com/spreadsheets/d/1pv0Bdk6B0etAeyY8o1PkyW2t8103hmCxSgqMZFmjy4A/pub?output=csv"
+    "url": "https://docs.google.com/spreadsheets/d/11KB81s3udI0evoIr-19MXb3aoqZvxiZIxyg0GXz_2rc/pub?output=csv"
   },
   "mongo": {
     "url": "mongodb://localhost:27017/mst"
