@@ -29,9 +29,6 @@ try {
   if (process.env.OPENSHIFT_REDISURL != null) {
     conf.app.redis.url = process.env.OPENSHIFT_REDISURL;
   }
-  if (process.env.OPENSHIFT_GOOGLE_DOC_URL != null) {
-    conf.app['google-docs'].url = process.env.OPENSHIFT_GOOGLE_DOC_URL;
-  }
   if (process.env.OPENSHIFT_LOGGINGPATH != null) {
     conf.app.loggingPath = process.env.OPENSHIFT_LOGGINGPATH;
   }
@@ -40,7 +37,7 @@ try {
     name: "mst",
     streams: [
       {
-        level: "debug",
+        level: "trace",
         stream: process.stdout
       }, {
         level: "error",

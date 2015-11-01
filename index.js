@@ -42,13 +42,10 @@ app.use(function (err, req, res, next) {
 });
 
 if (argv.refreshData) {
-  console.log('--refreshData flag set. Refreshing data from google doc at: ' + config['google-docs'].url);
+  console.error('--refreshData flag set. This is NO LONGER USED!');
 }
 
 (argv.refreshData ? app.services.googledocs.refreshLocalData() : when.resolve())
-  .then(function () {
-    return; // maybe build the datalayer here?
-  })
   .then(function () {
 
     var server = app.listen(app.get('port'), app.get('hostname'), function () {

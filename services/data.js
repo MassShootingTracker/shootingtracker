@@ -31,18 +31,19 @@ Data = (function() {
     var ref1, userpass;
     this.logger = logger1;
     this.pullSheetData = bind(this.pullSheetData, this);
+    this.csvToJSON = bind(this.csvToJSON, this);
     this.updateFromCSV = bind(this.updateFromCSV, this);
     this.getTotals = bind(this.getTotals, this);
     this.getByYear = bind(this.getByYear, this);
     this.getRedisKeys = bind(this.getRedisKeys, this);
     this.deleteRedisKey = bind(this.deleteRedisKey, this);
-    this.getMongoConn = bind(this.getMongoConn, this);
+    this.connectToMongo = bind(this.connectToMongo, this);
     this.getRedisConn = bind(this.getRedisConn, this);
     if (config == null) {
       throw 'config is required!';
     }
-    this.googleSheetURL = config['google-docs'].url;
     this.redisPort = config.redis.port;
+    this.csvUrls = config.googleDocs;
     userpass = '';
     if (config.mongo.user != null) {
       if (config.mongo.password == null) {
@@ -57,6 +58,11 @@ Data = (function() {
         level: (((ref1 = config.logging) != null ? ref1.level : void 0) != null) || 10
       });
     }
+    process.on('unhandledRejection', (function(_this) {
+      return function(reason, p) {
+        return _this.logger.error('Possibly Unhandled Rejection at: Promise ', p, ' reason: ', reason);
+      };
+    })(this));
   }
 
   Data.prototype.getRedisConn = function() {
@@ -82,24 +88,24 @@ Data = (function() {
     return promise;
   };
 
-  Data.prototype.getMongoConn = function() {
+  Data.prototype.connectToMongo = function() {
     var logger, promise;
-    mongoose.connect(this.mongoURL);
     logger = this.logger;
     promise = w.promise((function(_this) {
       return function(resolve, reject) {
-        var db;
-        if (_this.mongoConn != null) {
-          return resolve(_this.mongoConn);
+        if (mongoose.Connection.STATES.connected === mongoose.connection.readyState) {
+          return resolve(true);
         } else {
-          db = mongoose.connection;
-          db.on('error', function() {
-            return reject(arguments);
+          mongoose.connect(_this.mongoURL);
+          mongoose.connection.on('error', function(args) {
+            return logger.error(args);
           });
-          return db.once('open', function() {
-            logger.trace('connected to mongo; proceeding');
-            _this.mongoConn = mongoose.connection;
-            return resolve(mongoose.connection);
+          return mongoose.connection.once('open', function() {
+            _this.logger.debug('Mongo connection open');
+            _this.logger.debug({
+              args: arguments
+            });
+            return resolve(true);
           });
         }
       };
@@ -147,10 +153,10 @@ Data = (function() {
 
   Data.prototype.getByYear = function(year) {
     var getMongoConn, logger, promise, redisURL;
-    this.logger.trace("getting by year for " + year);
+    this.logger.debug("getting by year for " + year);
     logger = this.logger;
     redisURL = this.redisURL;
-    getMongoConn = this.getMongoConn;
+    getMongoConn = this.connectToMongo;
     promise = w.promise((function(_this) {
       return function(resolve, reject) {
         logger.trace('connecting to redis');
@@ -166,7 +172,7 @@ Data = (function() {
               if ((reply != null) && (reply.length != null) && reply.length > 0) {
 
                 /* found in redis, return that */
-                logger.debug('found in redis, returning');
+                logger.debug("key " + year + " found in redis, returning");
                 return resolve(reply);
               } else {
                 logger.trace('not found in redis');
@@ -189,6 +195,7 @@ Data = (function() {
                       return reject(err);
                     } else {
                       logger.trace("got shootings for year; storing in redis");
+                      logger.trace("modifying displayed year");
 
                       /* store in redis with a one day TTL */
                       redisClient.set(year, JSON.stringify(shootings));
@@ -222,7 +229,7 @@ Data = (function() {
         years = new moment();
         key = 'totals';
         startYear = 2014;
-        getMongoConn = _this.getMongoConn;
+        getMongoConn = _this.connectToMongo;
         return _this.getRedisConn()["catch"](function(err) {
           return reject(err);
         }).then(function(redisClient) {
@@ -261,6 +268,10 @@ Data = (function() {
                       var currentYear, duration, j, lastDate, ref1, ref2, results, year;
                       if (err != null) {
                         reject(err);
+                        return;
+                      }
+                      if (docs.length === 0) {
+                        resolve(null);
                         return;
                       }
                       lastDate = docs[0].date;
@@ -311,163 +322,176 @@ Data = (function() {
     if (data == null) {
       throw "no shootings element found in CSV data";
     }
-    mongoose.connect(this.mongoURL);
-    promise = w.promise(function(resolve, reject) {
-      var db;
-      db = mongoose.connection;
-      db.on('error', function() {
-        return reject(arguments);
-      });
-      return db.once('open', function(callback) {
-        var checked, d, entry, i, len, n, ref, results, total, upsert;
-        logger.debug('connected to mongo; pushing new values into db');
-        d = void 0;
-        i = void 0;
-        len = void 0;
-        ref = data;
-        total = data.length;
-        checked = 0;
-        n = 0;
-        i = 0;
-        len = ref.length;
-        results = [];
-        while (i < len) {
+    promise = w.promise((function(_this) {
+      return function(resolve, reject) {
+        return _this.connectToMongo().then(function(conn) {
+          var checked, d, e, entry, error, i, len, n, ref, total, upsert;
+          try {
+            logger.debug('connected to mongo; pushing new values into db');
+            d = void 0;
+            i = void 0;
+            len = void 0;
+            ref = data;
+            total = data.length;
+            checked = 0;
+            n = 0;
+            i = 0;
+            len = ref.length;
+            while (i < len) {
 
-          /*
-          
-          sample:
-          { date: '9/20/2015',
-           name: 'Unknown',
-           killed: 0,
-           wounded: 6,
-           city: 'Tulsa',
-           state: 'OK',
-           synopsis: '',
-           guns_info: '',
-           other_info: '',
-           sources_csv: 'http://www.newson6.com/story/30072412/six-shot-outside-tulsa-nightclub' },
-           */
-          d = ref[i];
-          entry = new Shooting;
-          entry.date = new Date(d.date);
-          entry.killed = d.killed;
-          entry.city = d.city;
-          entry.wounded = d.wounded;
-          entry.city = d.city;
-          entry.state = d.state;
-          if (d.sources_csv.indexOf(',') > -1) {
-            entry.sources = d.sources_csv.split(',');
-          } else {
-            entry.sources = d.sources_csv;
-          }
-          if (d.name.indexOf(';') > -1) {
-            d.name.split(';').forEach(function(p) {
-              return entry.perpetrators.push({
-                name: p
-              });
-            });
-          } else {
-            entry.perpetrators = [
-              {
-                name: d.name
-              }
-            ];
-          }
-          yearsInCSV.push(entry.date.getFullYear());
-
-          /*
-           find any entries on this data with the same city and state and at least one matching source
-           if found, delete and re-create
-           else just save each one
-           */
-          upsert = function(entry) {
-            return Shooting.find({
-              city: entry.city,
-              state: entry.state,
-              date: entry.date,
-              sources: {
-                $in: entry.sources
-              }
-            }).exec(function(err, shooting) {
-              var j, len1, ref1, year;
-              if (err) {
-                reject(err);
-              } else if (shooting.length > 1) {
-                logger.fatal('found multiple entries! (this should be very rare at best)');
-                logger.fatal({
-                  entry: shooting
-                });
-              } else if (shooting.length > 0) {
-                Shooting.remove({
-                  _id: shooting[0]._id
-                }, function(err, result) {
-                  entry.save();
+              /*
+              
+              sample:
+              { date: '9/20/2015',
+               name: 'Unknown',
+               killed: 0,
+               wounded: 6,
+               city: 'Tulsa',
+               state: 'OK',
+               synopsis: '',
+               guns_info: '',
+               other_info: '',
+               sources_semicolon_delimited: 'http://www.newson6.com/story/30072412/six-shot-outside-tulsa-nightclub' },
+               */
+              d = ref[i];
+              entry = new Shooting;
+              entry.date = moment.tz(d.date, "America/Los_Angeles").format();
+              entry.killed = d.killed;
+              entry.city = d.city;
+              entry.wounded = d.wounded;
+              entry.city = d.city;
+              entry.state = d.state;
+              if (d.sources_semicolon_delimited.indexOf(';') > -1) {
+                entry.sources = ld.filter(d.sources_semicolon_delimited.split(';'), function(x) {
+                  return !!x.length;
                 });
               } else {
-                ++n;
-                entry.save();
+                entry.sources = d.sources_semicolon_delimited;
               }
-              ++checked;
-              if (checked === total) {
-                logger.warn('done writing data to Mongo (' + n + ' new records)');
-                logger.info('deleting redis keys');
-                ref1 = ld.uniq(yearsInCSV);
-                for (j = 0, len1 = ref1.length; j < len1; j++) {
-                  year = ref1[j];
-                  deleteRedisKey('' + year);
-                }
-                deleteRedisKey('totals');
-                logger.warn('deleted redis keys');
-                return resolve(n);
+              if (d.name_semicolon_delimited.indexOf(';') > -1) {
+                d.name_semicolon_delimited.split(';').forEach(function(p) {
+                  return entry.perpetrators.push({
+                    name: p
+                  });
+                });
+              } else {
+                entry.perpetrators = [
+                  {
+                    name: d.name_semicolon_delimited
+                  }
+                ];
               }
-            });
-          };
-          upsert(entry);
-          results.push(i++);
-        }
-        return results;
-      });
-    });
+              logger.trace({
+                "entry": entry
+              });
+              yearsInCSV.push(entry.date.getFullYear());
+
+              /*
+               find any entries on this data with the same city and state and at least one matching source
+               if found, delete and re-create
+               else just save each one
+               */
+              upsert = function(entry) {
+                return Shooting.find({
+                  city: entry.city,
+                  state: entry.state,
+                  date: entry.date,
+                  sources: {
+                    $in: entry.sources
+                  }
+                }).exec(function(err, shooting) {
+                  var j, len1, ref1, year;
+                  if (err) {
+                    reject(err);
+                  } else if (shooting.length > 1) {
+                    logger.fatal('found multiple entries! (this should be very rare at best)');
+                    logger.fatal({
+                      entry: shooting
+                    });
+                  } else if (shooting.length > 0) {
+                    Shooting.remove({
+                      _id: shooting[0]._id
+                    }, function(err, result) {
+                      entry.save();
+                    });
+                  } else {
+                    ++n;
+                    entry.save();
+                  }
+                  ++checked;
+                  if (checked === total) {
+                    logger.warn('done writing data to Mongo (' + n + ' new records)');
+                    logger.info('deleting redis keys');
+                    ref1 = ld.uniq(yearsInCSV);
+                    for (j = 0, len1 = ref1.length; j < len1; j++) {
+                      year = ref1[j];
+                      deleteRedisKey('' + year);
+                    }
+                    deleteRedisKey('totals');
+                    logger.warn('deleted redis keys');
+                    return resolve(n);
+                  }
+                });
+              };
+              upsert(entry);
+              i++;
+            }
+            return resolve(n);
+          } catch (error) {
+            e = error;
+            return reject(e);
+          }
+        })["catch"](function(err) {
+          return reject(err);
+        });
+      };
+    })(this));
     return promise;
   };
 
   Data.prototype.getSheet = function(url) {
-    if (!this.googleSheetURL) {
-      throw 'no google docs url found in config, should be at config["google-docs"].url';
+    if (!((url != null) && !!url)) {
+      throw 'no google docs url found in config, should be at config["googleDocs"].url';
     }
     return nodefn.lift(request)({
-      uri: this.googleSheetURL
+      uri: url
     }).then(function(result) {
       return w.resolve(result[0].body);
     });
   };
 
   Data.prototype.csvToJSON = function(csvStr) {
-    var converter, promise;
+    var converter, logger, promise;
     converter = new Converter({});
+    logger = this.logger;
     promise = w.promise(function(resolve, reject) {
       return converter.fromString(csvStr, function(err, result) {
         if (err) {
           reject(err);
         }
+        logger.debug({
+          "csv records count": result.length
+        });
         return resolve(result);
       });
     });
     return promise;
   };
 
-  Data.prototype.pullSheetData = function() {
+  Data.prototype.pullSheetData = function(year) {
     var promise;
     return promise = w.promise((function(_this) {
       return function(resolve, reject) {
-        _this.logger.debug("pulling data from " + _this.googleSheetURL);
-        return _this.getSheet().then(function(sheetStr) {
+        var csvUrl;
+        csvUrl = _this.csvUrls[year];
+        _this.logger.debug("pulling data from " + csvUrl);
+        return _this.getSheet(csvUrl).then(function(sheetStr) {
           return _this.csvToJSON(sheetStr);
+        }).then(_this.updateFromCSV).then(function(result) {
+          _this.logger.debug("data pull complete: " + result);
+          return resolve(result);
         })["catch"](function(err) {
           return reject(err);
-        }).then(function(result) {
-          _this.logger.debug("data pull complete");
-          return resolve(result);
         });
       };
     })(this));
