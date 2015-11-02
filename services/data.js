@@ -14,7 +14,7 @@ Shooting = require('.././data/schema/shooting');
 
 redis = require('redis');
 
-moment = require('moment');
+moment = require('moment-timezone');
 
 redisTTL = 1 * 60 * 60;
 
@@ -190,7 +190,7 @@ Data = (function() {
                       $gte: begin,
                       $lt: end
                     }
-                  }).exec(function(err, shootings) {
+                  }).sort('-date').exec(function(err, shootings) {
                     if (err != null) {
                       return reject(err);
                     } else {
@@ -228,7 +228,7 @@ Data = (function() {
         logger.debug('connecting to redis');
         years = new moment();
         key = 'totals';
-        startYear = 2014;
+        startYear = 2013;
         getMongoConn = _this.connectToMongo;
         return _this.getRedisConn()["catch"](function(err) {
           return reject(err);
@@ -265,7 +265,7 @@ Data = (function() {
                     return Shooting.find(null, null, {
                       limit: 1
                     }).sort('-date').exec(function(err, docs) {
-                      var currentYear, duration, j, lastDate, ref1, ref2, results, year;
+                      var duration, lastDate;
                       if (err != null) {
                         reject(err);
                         return;
@@ -277,30 +277,50 @@ Data = (function() {
                       lastDate = docs[0].date;
                       duration = Math.floor(Math.abs(moment.duration(now.diff(lastDate)).asDays()));
                       result.daysSince = duration;
-                      currentYear = new Date().getFullYear();
-                      results = [];
-                      for (year = j = ref1 = startYear, ref2 = currentYear; ref1 <= ref2 ? j <= ref2 : j >= ref2; year = ref1 <= ref2 ? ++j : --j) {
-                        results.push((function(year) {
-                          return Shooting.count({
-                            date: {
-                              $gte: new Date(year, 1, 1),
-                              $lte: new Date(year, 12, 31)
-                            }
-                          }).exec(function(err, count) {
-                            if (err != null) {
-                              reject(err);
-                            } else {
-                              result[year] = count;
-                              if (year === currentYear) {
-                                redisClient.set(key, JSON.stringify(result));
-                                redisClient.expire(key, redisTTL);
-                                return resolve(result);
+                      return Shooting.find(null, null, {
+                        limit: 5
+                      }).sort('-date').exec(function(err, mostRecent) {
+                        var currentYear, j, ref1, ref2, results, year;
+                        logger.debug('got 5 most recent shootings');
+                        result.mostRecent = mostRecent;
+                        currentYear = new Date().getFullYear();
+                        years = [];
+                        results = [];
+                        for (year = j = ref1 = startYear, ref2 = currentYear; ref1 <= ref2 ? j <= ref2 : j >= ref2; year = ref1 <= ref2 ? ++j : --j) {
+                          years.push(year);
+                          results.push((function(year) {
+                            return Shooting.count({
+                              date: {
+                                $gte: new Date(year, 1, 1),
+                                $lte: new Date(year, 12, 31)
                               }
-                            }
-                          });
-                        })(year));
-                      }
-                      return results;
+                            }).exec(function(err, count) {
+                              var daysThisYear, k, len1, n;
+                              if (err != null) {
+                                reject(err);
+                              } else {
+                                result[year] = count;
+                                n = 0;
+                                for (k = 0, len1 = years.length; k < len1; k++) {
+                                  year = years[k];
+                                  if (result[year] != null) {
+                                    n++;
+                                  }
+                                }
+                                if (n === years.length) {
+                                  daysThisYear = Math.floor(Math.abs(moment.duration(new moment().diff(new Date(year, 1, 1))).asDays()));
+                                  result.average = ld.floor(result[year] / daysThisYear, 2);
+                                  console.dir(result.average);
+                                  redisClient.set(key, JSON.stringify(result));
+                                  redisClient.expire(key, redisTTL);
+                                  return resolve(result);
+                                }
+                              }
+                            });
+                          })(year));
+                        }
+                        return results;
+                      });
                     });
                   });
                 });

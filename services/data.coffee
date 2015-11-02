@@ -4,7 +4,7 @@ callbacks = require('when/callbacks')
 mongoose = require('mongoose')
 Shooting = require('.././data/schema/shooting')
 redis = require 'redis'
-moment = require 'moment'
+moment = require('moment-timezone')
 redisTTL = 1*60*60
 nodefn = require('when/node')
 request = require('request')
@@ -127,7 +127,7 @@ class Data
                 begin = moment("#{year} Jan 01", 'YYYY mmm DD')
                 end = moment("#{+year + 1} Jan 01", 'YYYY mmm DD')
 
-                Shooting.find(date: {$gte: begin, $lt: end}).exec( (err, shootings) ->
+                Shooting.find(date: {$gte: begin, $lt: end}).sort('-date').exec( (err, shootings) ->
                   if err?
                     reject(err)
                   else
@@ -159,7 +159,7 @@ class Data
       logger.debug 'connecting to redis'
       years = new moment()
       key = 'totals'
-      startYear = 2014 # the year we started collecting data
+      startYear = 2013 # the year we started collecting data
       getMongoConn = @connectToMongo
 
       @getRedisConn().catch((err)-> reject(err)).then((redisClient) ->
@@ -206,21 +206,35 @@ class Data
                     duration = Math.floor(Math.abs( moment.duration(now.diff(lastDate)).asDays() ))
                     result.daysSince = duration
 
-                    # get totals for each year
-                    currentYear = (new Date().getFullYear())
-                    for year in [startYear..currentYear]
-                      do (year) ->
-                        Shooting.count(date: {$gte: new Date(year, 1, 1), $lte: new Date(year, 12, 31)}).exec( (err, count) ->
-                          if err?
-                            reject(err)
-                            return
-                          else
-                            result[year] = count
-                            if (year == currentYear)
-                              redisClient.set(key, JSON.stringify(result))
-                              redisClient.expire(key, redisTTL)
-                              resolve(result)
-                      )
+                    Shooting.find(null, null, { limit: 5 }).sort('-date').exec( (err, mostRecent) ->
+                      logger.debug 'got 5 most recent shootings'
+                      result.mostRecent = mostRecent
+
+                      # get totals for each year
+                      currentYear = (new Date().getFullYear())
+                      years = []
+                      for year in [startYear..currentYear]
+                        years.push(year)
+                        do (year) ->
+                          Shooting.count(date: {$gte: new Date(year, 1, 1), $lte: new Date(year, 12, 31)}).exec( (err, count) ->
+                            if err?
+                              reject(err)
+                              return
+                            else
+                              result[year] = count
+                              n = 0
+                              for year in years
+                                if result[year]?
+                                  n++
+                              if (n == years.length)
+                                daysThisYear = Math.floor(Math.abs( moment.duration(new moment().diff(new Date(year, 1, 1))).asDays() ))
+                                result.average = ld.floor(result[year] / daysThisYear, 2)
+                                console.dir result.average
+                                redisClient.set(key, JSON.stringify(result))
+                                redisClient.expire(key, redisTTL)
+                                resolve(result)
+                        )
+                    )
                   )
                 )
           )
