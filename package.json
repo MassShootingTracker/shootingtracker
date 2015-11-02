@@ -102,6 +102,7 @@
   "homepage": "https://github.com/MassShootingTracker/shootingtracker#readme",
   "devDependencies": {
     "chai": "^1.10.0",
+    "loadtest": "^1.2.14",
     "lodash": "^3.10.1",
     "mocha": "^1.21.5",
     "sinon": "^1.17.2",

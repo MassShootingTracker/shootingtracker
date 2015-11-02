@@ -37,7 +37,7 @@ try {
     name: "mst",
     streams: [
       {
-        level: "trace",
+        level: "debug",
         stream: process.stdout
       }, {
         level: "error",

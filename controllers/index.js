@@ -79,8 +79,6 @@ Index.prototype.home = function home(req, res, next) {
       data.currentYearTotal = data[data.currentYear];
     }
 
-    console.dir(data);
-
     res.render('index');
   });
 }
