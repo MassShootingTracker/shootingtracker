@@ -9,7 +9,51 @@
 <div class="container-fluid">
   <div class="container mst-container-main">
     <div class="jumbotron">
-      <h1 class="center">Number of mass shootings in America this year: <strong>{{data.currentYear}}</strong></h1>
+      <h1 class="center">Number of mass shootings in America this year: <strong>{{data.currentYearTotal}}</strong></h1>
+
+      <h2 class="center">Days since the last mass shooting: <strong>{{data.daysSince}}</strong></h2>
+
+      <h2 class="center">Mass shootings per day this year: <strong>{{data.average}}</strong> </h2>
+<hr/>
+      <h2 class="center">The 5 most recent shootings:</h2>
+      <table class="table" style="background-color: white;">
+        <thead>
+        <tr>
+          <th>Date</th>
+          <th>Location</th>
+          <th>Dead</th>
+          <th>Injured</th>
+          <th>Shooter's Name</th>
+          <th>News articles</th>
+        </tr>
+        </thead>
+
+        <tbody class="tbody-inverse">
+        {{#each data.mostRecent}}
+          <tr>
+            <td>{{displayDate}}</td>
+            <td>{{city}},&nbsp;{{state}}</td>
+            <td>{{killed}}</td>
+            <td>{{wounded}}</td>
+            <td>
+              {{#each perpetrators}}
+                <div>{{name}}</div>
+              {{/each}}
+            </td>
+            <td>
+              {{#each sources}}
+                <div style="float:left; margin-right:10px;">
+                  <a target="_blank" href="{{this}}" title="{{this}}"><i class="fa fa-external-link"></i></a>
+                </div>
+              {{/each}}
+            </td>
+          </tr>
+        {{/each}}
+
+        </tbody>
+
+      </table>
+
 
       <p class="mst-shooting-definition">
         We define a mass shooting to be when 4 or more people are shot in a single burst of violence.
@@ -17,15 +61,12 @@
         Fighting apathy requires awareness.
         Learn more about why the government and the media's definition of "mass shooting" <a href="/about">is wrong...</a>
       </p>
-      <h3 class="center">{{data.daysSince}} days since the last mass shooting in America</h3>
+
 
       <div class="row mst-jumbotron-btns">
 
         <div class="col-xs-12 col-sm-3 center">
-          <a class="btn btn-block btn-success" href="/data"><i class="fa fa-database"></i>See the Data</a>
-        </div>
-        <div class="col-xs-12 col-sm-3 center">
-          <a class="btn btn-block btn-danger" href="#"><i class="fa fa-share-alt"></i>Share this page</a>
+          <a class="btn btn-block btn-success" href="/{{data.currentYear}}"><i class="fa fa-database"></i>See the Data</a>
         </div>
         <div class="col-xs-12 col-sm-3 center">
           <a class="btn btn-block btn-danger" href="https://twitter.com/GunsAreCool"><i class="fa fa-twitter"></i>Follow us on Twitter</a>

@@ -68,9 +68,19 @@ Index.prototype.home = function home(req, res, next) {
   dataLayer.getTotals().then(function (data) {
     app.locals.data = data;
     if (data != null) {
-      data.currentYear = data[new Date().getFullYear()];
+
+      var _i, _len, shooting;
+      for (_i = 0, _len = data.mostRecent.length; _i < _len; _i++) {
+        shooting = data.mostRecent[_i];
+        shooting.displayDate = new moment(shooting.date).format("MM/DD/YYYY");
+      }
+
+      data.currentYear = new Date().getFullYear();
+      data.currentYearTotal = data[data.currentYear];
     }
-    //console.dir(data);
+
+    console.dir(data);
+
     res.render('index');
   });
 }
@@ -89,6 +99,7 @@ Index.prototype.datapage = function datapage(req, res, next) {
     for (_i = 0, _len = shootings.length; _i < _len; _i++) {
       shooting = shootings[_i];
       shooting.displayDate = new moment(shooting.date).format("MM/DD/YYYY");
+      shooting.number = _i + 1;
     }
 
     res.render('data');
