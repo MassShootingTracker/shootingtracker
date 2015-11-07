@@ -12,8 +12,8 @@
   },
   "scripts": {
     "test": "mocha test/integration/redisMongoDocs.js",
-    "start": "gulp run",
-    "postinstall": "gulp build"
+    "start": "gulp build run",
+    "postinstall": "gulp build && npm test"
   },
   "license": "MIT",
   "dependencies": {

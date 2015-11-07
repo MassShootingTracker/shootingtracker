@@ -83,18 +83,18 @@ describe 'GoogleDocs / Redis / Mongo Integration', ->
     ).done((shootings) ->
       shootings.should.be
       shootings.length.should.be.gt(200)
-      shootings.length.should.be.lt(500)
+      shootings.length.should.be.lt(10000)
       done()
     )
 
   it 'should get the sheet data', (done)->
     dl = getDataLayer()
     dl.should.be
-    dl.pullSheetData().catch((err) ->
+    dl.pullSheetData(2015).catch((err) ->
       throw err
-    ).done((sheet) ->
-      sheet.should.be
-      sheet.length.should.be.gt(200)
+    ).done((count) ->
+      count.should.be
+      count.should.be.gt(-1)
       done()
     )
 

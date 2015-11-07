@@ -5,6 +5,7 @@ mongoose = require('mongoose')
 Shooting = require('.././data/schema/shooting')
 redis = require 'redis'
 moment = require('moment-timezone')
+
 redisTTL = 1*60*60
 nodefn = require('when/node')
 request = require('request')
@@ -157,7 +158,6 @@ class Data
     promise = w.promise (resolve, reject) =>
       logger = @logger
       logger.debug 'connecting to redis'
-      years = new moment()
       key = 'totals'
       startYear = 2013 # the year we started collecting data
       getMongoConn = @connectToMongo
@@ -188,7 +188,7 @@ class Data
 
                   result.totalAllYears = count
 
-                  now = new moment()
+                  now = moment()
 
                   # find the hours since last shooting
                   # MyModel.find(query, fields, { skip: 10, limit: 5 }, function(err, results) { ... });
@@ -227,9 +227,8 @@ class Data
                                 if result[year]?
                                   n++
                               if (n == years.length)
-                                daysThisYear = Math.floor(Math.abs( moment.duration(new moment().diff(new Date(year, 1, 1))).asDays() ))
+                                daysThisYear = Math.floor(Math.abs( moment.duration(moment().diff(new Date(year, 1, 1))).asDays() ))
                                 result.average = ld.floor(result[year] / daysThisYear, 2)
-                                console.dir result.average
                                 redisClient.set(key, JSON.stringify(result))
                                 redisClient.expire(key, redisTTL)
                                 resolve(result)
@@ -291,7 +290,7 @@ class Data
 
             # we're just assuming east coast time here; actual times aren't important, just dates
             # this is so entries on 12/31 don't fall in to the next year
-            entry.date = moment.tz(d.date, "America/Los_Angeles").format()
+            entry.date = moment.tz(d.date, 'MM/DD/YYYY', "America/Los_Angeles").format()
             entry.killed = d.killed
             entry.city = d.city
             entry.wounded = d.wounded
@@ -363,7 +362,7 @@ class Data
 
   getSheet: (url) ->
     unless  url? and !!url
-      throw 'no google docs url found in config, should be at config["googleDocs"].url'
+      throw 'getSheet did not receive a valid url'
     nodefn.lift(request)(uri: url).then (result) ->
       w.resolve result[0].body
 
@@ -379,6 +378,7 @@ class Data
     promise
 
   pullSheetData: (year) =>
+    this.timeout = 5000
     promise = w.promise (resolve, reject) =>
       csvUrl = @csvUrls[year]
       @logger.debug "pulling data from " + csvUrl

@@ -223,10 +223,9 @@ Data = (function() {
     var promise;
     promise = w.promise((function(_this) {
       return function(resolve, reject) {
-        var getMongoConn, key, logger, startYear, years;
+        var getMongoConn, key, logger, startYear;
         logger = _this.logger;
         logger.debug('connecting to redis');
-        years = new moment();
         key = 'totals';
         startYear = 2013;
         getMongoConn = _this.connectToMongo;
@@ -261,7 +260,7 @@ Data = (function() {
                       return;
                     }
                     result.totalAllYears = count;
-                    now = new moment();
+                    now = moment();
                     return Shooting.find(null, null, {
                       limit: 1
                     }).sort('-date').exec(function(err, docs) {
@@ -280,7 +279,7 @@ Data = (function() {
                       return Shooting.find(null, null, {
                         limit: 5
                       }).sort('-date').exec(function(err, mostRecent) {
-                        var currentYear, j, ref1, ref2, results, year;
+                        var currentYear, j, ref1, ref2, results, year, years;
                         logger.debug('got 5 most recent shootings');
                         result.mostRecent = mostRecent;
                         currentYear = new Date().getFullYear();
@@ -308,9 +307,8 @@ Data = (function() {
                                   }
                                 }
                                 if (n === years.length) {
-                                  daysThisYear = Math.floor(Math.abs(moment.duration(new moment().diff(new Date(year, 1, 1))).asDays()));
+                                  daysThisYear = Math.floor(Math.abs(moment.duration(moment().diff(new Date(year, 1, 1))).asDays()));
                                   result.average = ld.floor(result[year] / daysThisYear, 2);
-                                  console.dir(result.average);
                                   redisClient.set(key, JSON.stringify(result));
                                   redisClient.expire(key, redisTTL);
                                   return resolve(result);
@@ -375,7 +373,7 @@ Data = (function() {
                */
               d = ref[i];
               entry = new Shooting;
-              entry.date = moment.tz(d.date, "America/Los_Angeles").format();
+              entry.date = moment.tz(d.date, 'MM/DD/YYYY', "America/Los_Angeles").format();
               entry.killed = d.killed;
               entry.city = d.city;
               entry.wounded = d.wounded;
@@ -471,7 +469,7 @@ Data = (function() {
 
   Data.prototype.getSheet = function(url) {
     if (!((url != null) && !!url)) {
-      throw 'no google docs url found in config, should be at config["googleDocs"].url';
+      throw 'getSheet did not receive a valid url';
     }
     return nodefn.lift(request)({
       uri: url
@@ -500,6 +498,7 @@ Data = (function() {
 
   Data.prototype.pullSheetData = function(year) {
     var promise;
+    this.timeout = 5000;
     return promise = w.promise((function(_this) {
       return function(resolve, reject) {
         var csvUrl;

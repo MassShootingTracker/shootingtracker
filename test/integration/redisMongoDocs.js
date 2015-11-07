@@ -101,7 +101,7 @@ describe('GoogleDocs / Redis / Mongo Integration', function() {
     }).done(function(shootings) {
       shootings.should.be;
       shootings.length.should.be.gt(200);
-      shootings.length.should.be.lt(500);
+      shootings.length.should.be.lt(10000);
       return done();
     });
   });
@@ -109,11 +109,11 @@ describe('GoogleDocs / Redis / Mongo Integration', function() {
     var dl;
     dl = getDataLayer();
     dl.should.be;
-    return dl.pullSheetData()["catch"](function(err) {
+    return dl.pullSheetData(2015)["catch"](function(err) {
       throw err;
-    }).done(function(sheet) {
-      sheet.should.be;
-      sheet.length.should.be.gt(200);
+    }).done(function(count) {
+      count.should.be;
+      count.should.be.gt(-1);
       return done();
     });
   });
