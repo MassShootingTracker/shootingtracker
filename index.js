@@ -46,7 +46,12 @@ if (argv.refreshData) {
 }
 
 (argv.refreshData ? app.services.googledocs.refreshLocalData() : when.resolve())
-  .then(function () {
+  .then(function(){
+    app.locals.data = argv.refreshData ? shootingData : require('./data/shootings.json');
+    app.locals.data.recentShootings = app.locals.data.shootings.slice(0, 5);
+    app.locals.downloadUrl = config['google-docs'].url;
+  })
+  .then(function() {
 
     var server = app.listen(app.get('port'), app.get('hostname'), function () {
 

@@ -3,20 +3,33 @@
 <div class="container-fluid">
   <div class="container mst-container-main">
 
+    <div class="row">
+      <div class="col-sm-12">
+        <ul class="list-inline">
+          <li><a href="/data">All</a></li>
+          <li><a href="/data/2015">2015</a></li>
+          <li><a href="/data/2014">2014</a></li>
+          <li><a href="/data/2013">2013</a></li>
+        </ul>
+      </div>
+    </div>
+
     <div class="mst-button-row">
 
-        <a href="#" class="btn btn-default"><i class="fa fa-download"></i>Download</a>
+        <a href="{{downloadUrl}}" class="btn btn-default"><i class="fa fa-download"></i> Download .CSV</a>
 
     </div>
+
 
     <table class="table">
       <thead>
         <tr>
+          <th>#</th>
           <th>Date</th>
           <th>Location</th>
           <th>Dead</th>
           <th>Injured</th>
-          <th>Shooter's Name</th>
+          <th>Shooter(s)</th>
           <th>News articles</th>
         </tr>
       </thead>
@@ -53,13 +66,13 @@ date: '2015-01-02T08:00:00.000Z' }
      {{/each}}
    </td>
    <td>
-
+      <ul class="list-inline">
      {{#each sources}}
-       <div style="float:left; margin-right:10px;">
+       <li style="float:left; margin-right:10px;">
          <a target="_blank" href="{{this}}" title="{{this}}"><i class="fa fa-external-link"></i></a>
-       </div>
+       </li>
      {{/each}}
-     </ol>
+     </ul>
    </td>
  </tr>
  {{/each}}
