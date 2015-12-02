@@ -26,6 +26,8 @@ Index.prototype.register = function () {
   this.app.get('/', this.home);
   this.app.get('/about', this.aboutus);
   this.app.get('/data', this.datapage);
+  this.app.get('/data/:year', this.datapage);
+
   this.app.post('/update', function (req, res) {
 
     logger.debug('attempting update');
@@ -81,6 +83,7 @@ Index.prototype.home = function home(req, res, next) {
 
     res.render('index');
   });
+
 }
 
 Index.prototype.aboutus = function aboutus(req, res, next) {
@@ -88,6 +91,7 @@ Index.prototype.aboutus = function aboutus(req, res, next) {
 }
 
 Index.prototype.datapage = function datapage(req, res, next) {
+
   config.logger.debug('building datapage with param: ' + req.params.year);
   dataLayer.getByYear(+req.params.year).then(function (shootings) {
     app.locals.data = shootings;
@@ -100,6 +104,6 @@ Index.prototype.datapage = function datapage(req, res, next) {
       shooting.number = _i + 1;
     }
 
-    res.render('data');
+    res.render('data', {year: req.params.year});
   });
 }

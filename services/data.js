@@ -183,14 +183,20 @@
                   }).then(function(dbconn) {
                     var begin, end;
                     logger.trace("pulling by year from mongo");
-                    begin = moment(year + " Jan 01", 'YYYY mmm DD');
-                    end = moment((+year + 1) + " Jan 01", 'YYYY mmm DD');
+                    if (year) {
+                      begin = moment(year + " Jan 01", 'YYYY mmm DD');
+                      end = moment((+year + 1) + " Jan 01", 'YYYY mmm DD');
+                    } else {
+                      begin = moment().subtract(20, 'years');
+                      end = moment();
+                    }
                     return Shooting.find({
                       date: {
                         $gte: begin,
                         $lt: end
                       }
                     }).sort('-date').exec(function(err, shootings) {
+                      console.log('n shootings', shootings.length);
                       if (err != null) {
                         return reject(err);
                       } else {

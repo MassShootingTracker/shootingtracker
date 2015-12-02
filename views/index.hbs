@@ -1,6 +1,5 @@
 {{>navbar}}
 
-
 {{!--
 
 "{\"2014\":341,\"2015\":272,\"totalAllYears\":633,\"daysSince\":30}"
@@ -8,77 +7,21 @@
 --}}
 <div class="container-fluid">
   <div class="container mst-container-main">
-    <div class="jumbotron">
-      <h1 class="center">Number of mass shootings in America this year: <strong>{{data.currentYearTotal}}</strong></h1>
-
-      <h2 class="center">Days since the last mass shooting: <strong>{{data.daysSince}}</strong></h2>
-
-      <h2 class="center">Mass shootings per day this year: <strong>{{data.average}}</strong> </h2>
-<hr/>
-      <h2 class="center">The 5 most recent shootings:</h2>
-      <table class="table" style="background-color: white;">
-        <thead>
-        <tr>
-          <th>Date</th>
-          <th>Location</th>
-          <th>Dead</th>
-          <th>Injured</th>
-          <th>Shooter's Name</th>
-          <th>News articles</th>
-        </tr>
-        </thead>
-
-        <tbody class="tbody-inverse">
-        {{#each data.mostRecent}}
-          <tr>
-            <td>{{displayDate}}</td>
-            <td>{{city}},&nbsp;{{state}}</td>
-            <td>{{killed}}</td>
-            <td>{{wounded}}</td>
-            <td>
-              {{#each perpetrators}}
-                <div>{{name}}</div>
-              {{/each}}
-            </td>
-            <td>
-              {{#each sources}}
-                <div style="float:left; margin-right:10px;">
-                  <a target="_blank" href="{{this}}" title="{{this}}"><i class="fa fa-external-link"></i></a>
-                </div>
-              {{/each}}
-            </td>
-          </tr>
-        {{/each}}
-
-        </tbody>
-
-      </table>
-
+    <div>
+      <h1><span class="label label-danger">{{data.currentYearTotal}}</span> U.S. mass shootings in {{data.currentYear}}</h1>
+      <h1><span class="label label-danger">{{data.daysSince}}</span> days since last U.S. mass shooting</h1>
 
       <p class="mst-shooting-definition">
-        We define a mass shooting to be when 4 or more people are shot in a single burst of violence.
-        These events happen almost every day in America, yet the media only reports on a small fraction of the worst episodes.
-        Fighting apathy requires awareness.
-        Learn more about why the government and the media's definition of "mass shooting" <a href="/about">is wrong...</a>
+        The Mass Shooting Tracker is a crowd sourced database of U.S. mass shootings. We define a "mass shooting" as a single outburst of violence in which four or more people are shot. <a href="/about">Learn More >></a>
       </p>
 
+    {{>recentshootings}}
 
-      <div class="row mst-jumbotron-btns">
-
-        <div class="col-xs-12 col-sm-3 center">
-          <a class="btn btn-block btn-success" href="/{{data.currentYear}}"><i class="fa fa-database"></i>See the Data</a>
-        </div>
-        <div class="col-xs-12 col-sm-3 center">
-          <a class="btn btn-block btn-danger" href="https://twitter.com/GunsAreCool"><i class="fa fa-twitter"></i>Follow us on Twitter</a>
-        </div>
-        <div class="col-xs-12 col-sm-3 center">
-          <a class="btn btn-block btn-danger" href="https://reddit.com/r/GunsAreCool"><i class="fa fa-reddit"></i>Follow us on Reddit</a>
-        </div>
-
+    <div class="row bottom-row">
+      <div class="col-sm-12">
+        <a class="btn btn-large btn-danger" href="/data">See all the data</a>
       </div>
     </div>
-
-    {{>recentshootings}}
 
   </div>
 </div>
