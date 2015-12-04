@@ -27,7 +27,11 @@ class Data
         throw 'no password, password is required if user is set'
       userpass = "#{config.mongo.user}:#{config.mongo.password}@"
 
-    @mongoURL = "mongodb://#{userpass}#{config.mongo.url}"
+    if userpass
+      @mongoURL = "mongodb://#{userpass}#{config.mongo.url}"
+    else
+      @mongoURL = config.mongo.url
+
     unless @logger?
       @logger = (require 'bunyan')({name: 'mst-data', level: (config.logging?.level? or 10)})
 
@@ -41,7 +45,11 @@ class Data
       if @redisClient?
         resolve(@redisClient)
       else
-        redisClient = redis.createClient(@redisPort)
+        redisClient = redis.createClient({
+          port: config.redis.port,
+          host: config.redis.host,
+          auth_pass: config.redis.auth_pass,
+        })
         redisClient.on( 'connect', =>
           @redisClient = redisClient
           resolve(redisClient)
