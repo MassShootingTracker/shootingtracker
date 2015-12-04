@@ -12,8 +12,8 @@
   },
   "scripts": {
     "test": "mocha test/integration/redisMongoDocs.js",
-    "start": "gulp run",
-    "postinstall": "gulp build"
+    "start": "gulp build run",
+    "postinstall": "gulp build && npm test"
   },
   "license": "MIT",
   "dependencies": {
@@ -72,6 +72,7 @@
     "minimist": "^1.2.0",
     "mocha": "^1.21.4",
     "moment": "^2.10.6",
+    "moment-timezone": "^0.4.1",
     "mongodb": "^2.0.46",
     "mongoose": "^4.1.11",
     "mongoose-redis-cache": "0.0.3",
@@ -84,6 +85,7 @@
     "redis-mock": "^0.3.0",
     "request": "^2.64.0",
     "run-sequence": "^0.3.6",
+    "serve-favicon": "^2.3.0",
     "string": "^3.3.1",
     "vinyl-source-stream": "^1.1.0",
     "watchify": "^3.4.0",
@@ -101,6 +103,7 @@
   "homepage": "https://github.com/MassShootingTracker/shootingtracker#readme",
   "devDependencies": {
     "chai": "^1.10.0",
+    "loadtest": "^1.2.14",
     "lodash": "^3.10.1",
     "mocha": "^1.21.5",
     "sinon": "^1.17.2",

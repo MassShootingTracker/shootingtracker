@@ -1,43 +1,31 @@
 {{>navbar}}
 
-
 {{!--
-{ '2014': 24, '2015': 279, totalAllYears: 303, daysSince: 15 }
+
+"{\"2014\":341,\"2015\":272,\"totalAllYears\":633,\"daysSince\":30}"
 
 --}}
 <div class="container-fluid">
   <div class="container mst-container-main">
-    <div class="jumbotron">
-      <h1 class="center">Number of mass shootings in America this year: <strong>{{data.currentYear}}</strong></h1>
+    <div>
+      <h1><span class="label label-danger">{{data.currentYearTotal}}</span> U.S. mass shootings in {{data.currentYear}}
+      </h1>
+
+      <h1><span class="label label-danger">{{data.daysSince}}</span> days since last U.S. mass shooting</h1>
 
       <p class="mst-shooting-definition">
-        We define a mass shooting to be when 4 or more people are shot in a single burst of violence.
-        These events happen almost every day in America, yet the media only reports on a small fraction of the worst episodes.
-        Fighting apathy requires awareness.
-        Learn more about why the government and the media's definition of "mass shooting" <a href="/about">is wrong...</a>
+        The Mass Shooting Tracker is a crowd sourced database of U.S. mass shootings. We define a "mass shooting" as a
+        single outburst of violence in which four or more people are shot. <a href="/about">Learn More >></a>
       </p>
-      <h3 class="center">{{data.daysSince}} days since the last mass shooting</h3>
-      <h3 class="center">Expected time until next mass shooting: 2 days, 13 hours, 20 minutes, 11 seconds</h3>
 
-      <div class="row mst-jumbotron-btns">
+      {{>recentshootings}}
 
-        <div class="col-xs-12 col-sm-3 center">
-          <a class="btn btn-block btn-success" href="/data"><i class="fa fa-database"></i>See the Data</a>
+      <div class="row bottom-row">
+        <div class="col-sm-12">
+          <a class="btn btn-large btn-danger" href="/data">See all the data</a>
         </div>
-        <div class="col-xs-12 col-sm-3 center">
-          <a class="btn btn-block btn-danger" href="#"><i class="fa fa-share-alt"></i>Share this page</a>
-        </div>
-        <div class="col-xs-12 col-sm-3 center">
-          <a class="btn btn-block btn-danger" href="https://twitter.com/GunsAreCool"><i class="fa fa-twitter"></i>Follow us on Twitter</a>
-        </div>
-        <div class="col-xs-12 col-sm-3 center">
-          <a class="btn btn-block btn-danger" href="https://reddit.com/r/GunsAreCool"><i class="fa fa-reddit"></i>Follow us on Reddit</a>
-        </div>
-
       </div>
+
     </div>
-
-    {{>recentshootings}}
-
   </div>
 </div>

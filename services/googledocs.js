@@ -19,8 +19,8 @@ function GoogleDocs(app) {
     this.url = process.env.GOOGLE_DOC_URL;
     this.mongoUrl = process.env.MONGO_URL;
   } else {
-    this.url = config['google-docs'].url;
-    mongoUrl = config['mongo'].url;
+    this.url = config.googleDocs.url;
+    mongoUrl = config.mongo.url;
   }
 
   _.bindAll(this);

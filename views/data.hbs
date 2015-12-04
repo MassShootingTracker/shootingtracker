@@ -1,23 +1,51 @@
 {{>navbar}}
 
 <div class="container-fluid">
-  <div class="container mst-container-main">
+  <div class="container mst-container-main mst-data-page">
+
+    <div class="row">
+      <div class="col-sm-12">
+        <ul class="list-inline">
+
+          {{#if isAll}}
+            <li class="active"><a href="/data">All</a></li>
+          {{else}}
+            <li><a href="/data">All</a></li>
+          {{/if}}
+          {{#if is2015}}
+            <li class="active" ><a href="/data/2015">2015</a></li>
+          {{else}}
+            <li><a href="/data/2015">2015</a></li>
+          {{/if}}
+          {{#if is2014}}
+            <li class="active"><a  href="/data/2014">2014</a></li>
+          {{else}}
+            <li><a href="/data/2014">2014</a></li>
+          {{/if}}
+          {{#if is2013}}
+            <li class="active"><a href="/data/2013">2013</a></li>
+          {{else}}
+            <li><a href="/data/2013">2013</a></li>
+          {{/if}}
+        </ul>
+      </div>
+    </div>
 
     <div class="mst-button-row">
-
-        <a href="#" class="btn btn-default"><i class="fa fa-download"></i>Download</a>
-
+        <a href="{{downloadUrl2015}}" class="btn btn-default"><i class="fa fa-download"></i> Download 2015 Data</a>
+        <a href="{{downloadUrl2014}}" class="btn btn-default"><i class="fa fa-download"></i> Download 2014 Data</a>
+        <a href="{{downloadUrl2013}}" class="btn btn-default"><i class="fa fa-download"></i> Download 2013 Data</a>
     </div>
 
     <table class="table">
       <thead>
         <tr>
+          <th>#</th>
           <th>Date</th>
           <th>Location</th>
           <th>Dead</th>
           <th>Injured</th>
-          <th>Shooter's Name</th>
-          <th>Synopsis</th>
+          <th>Shooter(s)</th>
           <th>News articles</th>
         </tr>
       </thead>
@@ -43,7 +71,8 @@ date: '2015-01-02T08:00:00.000Z' }
 <tbody>
  {{#each data}}
  <tr>
-   <td>{{date}}</td>
+   <td>{{number}}</td>
+   <td>{{displayDate}}</td>
    <td>{{city}},&nbsp;{{state}}</td>
    <td>{{killed}}</td>
    <td>{{wounded}}</td>
@@ -52,15 +81,14 @@ date: '2015-01-02T08:00:00.000Z' }
      <div>{{name}}</div>
      {{/each}}
    </td>
-   <td>{{synopsis}}</td>
    <td>
-     <ol>
+      <ul class="list-inline">
      {{#each sources}}
-       <li>
+       <li style="float:left; margin-right:10px;">
          <a target="_blank" href="{{this}}" title="{{this}}"><i class="fa fa-external-link"></i></a>
        </li>
      {{/each}}
-     </ol>
+     </ul>
    </td>
  </tr>
  {{/each}}
