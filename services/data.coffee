@@ -18,7 +18,7 @@ class Data
     unless config?
       throw 'config is required!'
 
-    @redisPort = config.redis.port
+    @config = config
     @csvUrls = config.googleDocs
     # mongodb://[username:password@]host1[:port1]
     userpass = ''
@@ -46,9 +46,9 @@ class Data
         resolve(@redisClient)
       else
         redisClient = redis.createClient({
-          port: config.redis.port,
-          host: config.redis.host,
-          auth_pass: config.redis.auth_pass,
+          port: @config.redis.port,
+          host: @config.redis.host,
+          auth_pass: @config.redis.auth_pass,
         })
         redisClient.on( 'connect', =>
           @redisClient = redisClient
