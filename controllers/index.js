@@ -90,7 +90,7 @@ Index.prototype.aboutus = function aboutus(req, res, next) {
 Index.prototype.datapage = function datapage(req, res, next) {
 
   config.logger.debug('building datapage with param: ' + req.params.year);
-  dataLayer.getByYear(+req.params.year).then(function (shootings) {
+  dataLayer.getByYear(req.params.year).then(function (shootings) {
     app.locals.data = shootings;
     //console.dir(data[0])
 
@@ -101,6 +101,6 @@ Index.prototype.datapage = function datapage(req, res, next) {
       shooting.number = _i + 1;
     }
 
-    res.render('data', {year: req.params.year});
+    res.render('data', {year: req.params.year });
   });
 }

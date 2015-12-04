@@ -8,20 +8,24 @@
 <div class="container-fluid">
   <div class="container mst-container-main">
     <div>
-      <h1><span class="label label-danger">{{data.currentYearTotal}}</span> U.S. mass shootings in {{data.currentYear}}</h1>
+      <h1><span class="label label-danger">{{data.currentYearTotal}}</span> U.S. mass shootings in {{data.currentYear}}
+      </h1>
+
       <h1><span class="label label-danger">{{data.daysSince}}</span> days since last U.S. mass shooting</h1>
 
       <p class="mst-shooting-definition">
-        The Mass Shooting Tracker is a crowd sourced database of U.S. mass shootings. We define a "mass shooting" as a single outburst of violence in which four or more people are shot. <a href="/about">Learn More >></a>
+        The Mass Shooting Tracker is a crowd sourced database of U.S. mass shootings. We define a "mass shooting" as a
+        single outburst of violence in which four or more people are shot. <a href="/about">Learn More >></a>
       </p>
 
-    {{>recentshootings}}
+      {{>recentshootings}}
 
-    <div class="row bottom-row">
-      <div class="col-sm-12">
-        <a class="btn btn-large btn-danger" href="/data">See all the data</a>
+      <div class="row bottom-row">
+        <div class="col-sm-12">
+          <a class="btn btn-large btn-danger" href="/data">See all the data</a>
+        </div>
       </div>
-    </div>
 
+    </div>
   </div>
 </div>

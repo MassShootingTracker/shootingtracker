@@ -98,8 +98,8 @@ class Data
     return promise
 
   getByYear: (year) =>
+    year ?= 'all'
     @logger.debug "getting by year for #{year}"
-
     logger = @logger
     redisURL = @redisURL
     getMongoConn = @connectToMongo
@@ -107,7 +107,7 @@ class Data
     promise = w.promise (resolve, reject) =>
       logger.trace 'connecting to redis'
 
-      @getRedisConn().catch((err)-> reject(err)).then((redisClient) ->
+      @getRedisConn().catch((err) -> reject(err)).then((redisClient) ->
 
         redisClient.get(year, (err, reply) ->
           if err?
@@ -123,27 +123,28 @@ class Data
               logger.trace 'not found in redis'
               ### redis returned an empty set, get from mongo ###
               getMongoConn().catch((err)-> reject(err)).then((dbconn) ->
-                logger.trace "pulling by year from mongo"
+                logger.trace "pulling by year from mongo for #{year}"
 
                 #  moment("2014 Apr 25", "YYYY mmm DD");
-                if year
-                  begin = moment("#{year} Jan 01", 'YYYY mmm DD')
-                  end = moment("#{+year + 1} Jan 01", 'YYYY mmm DD')
+
+                if year != 'all'
+                  begin = moment("#{year} Jan 01", 'YYYY mmm DD').year()
+                  end = moment("#{+year + 1} Jan 01", 'YYYY mmm DD').year()
                 else
-                  begin = moment().subtract(20, 'years');
-                  end = moment();
+                  begin = moment().subtract(20, 'years').year();
+                  end = moment().add(1, 'years').year();
 
-                Shooting.find(date: {$gte: begin, $lt: end}).sort('-date').exec( (err, shootings) ->
+                logger.trace( begin: begin, end: end )
 
-                  console.log('n shootings', shootings.length)
+                # db.shootings.find({$where : function() { return this.date.getFullYear() == '2014' }})
+                Shooting.$where("this.date.getFullYear() >= #{begin} && this.date.getFullYear() < #{end}").sort('-date').exec((err, shootings) ->
+
+                  logger.debug('# shootings', shootings?.length or 0)
                   if err?
                     reject(err)
                   else
                     logger.trace "got shootings for year; storing in redis"
                     logger.trace "modifying displayed year"
-
-                    #for shooting in shootings
-                    #  shooting.date = new moment(x.date).format("MM/DD/YYYY")
 
                     ### store in redis with a one day TTL ###
                     redisClient.set(year, JSON.stringify(shootings))
