@@ -135,7 +135,6 @@ class Data
 
                 Shooting.find(date: {$gte: begin, $lt: end}).sort('-date').exec( (err, shootings) ->
 
-                  console.log('n shootings', shootings.length)
                   if err?
                     reject(err)
                   else
