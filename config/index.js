@@ -11,26 +11,29 @@ try {
   def = require('./default.json');
   conf = ld.merge(conf, def);
 
-  if (process.env.OPENSHIFT_APPPORT != null) {
-    conf.app.port = process.env.OPENSHIFT_APPPORT;
+  if (process.env.OPENSHIFT_NODEJS_PORT) {
+    conf.app.port = process.env.OPENSHIFT_NODEJS_PORT;
   }
-  if (process.env.OPENSHIFT_APIKEY != null) {
+  if (process.env.OPENSHIFT_APIKEY) {
     conf.app.apiKey = process.env.OPENSHIFT_APIKEY;
   }
-  if (process.env.OPENSHIFT_MONGOURL != null) {
-    conf.app.mongo.url = process.env.OPENSHIFT_MONGOURL;
+  if (process.env.MONGOLAB_URI) {
+    conf.app.mongo.url = process.env.MONGOLAB_URI;
   }
-  if (process.env.OPENSHIFT_MONGOPSWD != null) {
-    conf.app.mongo.password = process.env.OPENSHIFT_MONGOPSWD;
-  }
-  if (process.env.OPENSHIFT_MONGOUSER != null) {
-    conf.app.mongo.user = process.env.OPENSHIFT_MONGOUSER;
-  }
-  if (process.env.OPENSHIFT_REDISURL != null) {
+  if (process.env.OPENSHIFT_REDISURL) {
     conf.app.redis.url = process.env.OPENSHIFT_REDISURL;
   }
-  if (process.env.OPENSHIFT_LOGGINGPATH != null) {
-    conf.app.loggingPath = process.env.OPENSHIFT_LOGGINGPATH;
+  if (process.env.OPENSHIFT_LOG_DIR) {
+    conf.app.loggingPath = process.env.OPENSHIFT_LOG_DIR;
+  }
+  if (process.env.REDISCLOUD_HOSTNAME) {
+    conf.app.redis.host = process.env.REDISCLOUD_HOSTNAME;
+  }
+  if (process.env.REDISCLOUD_PASSWORD) {
+    conf.app.redis.auth_pass = process.env.REDISCLOUD_PASSWORD;
+  }
+  if (process.env.REDISCLOUD_PORT) {
+    conf.app.redis.port = process.env.REDISCLOUD_PORT;
   }
 
   conf.logger = (require('bunyan')).createLogger({
