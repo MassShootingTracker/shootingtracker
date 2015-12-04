@@ -88,8 +88,6 @@ Index.prototype.aboutus = function aboutus(req, res, next) {
 }
 
 Index.prototype.datapage = function datapage(req, res, next) {
-
-  config.logger.debug('building datapage with param: ' + req.params.year);
   dataLayer.getByYear(+req.params.year).then(function (shootings) {
     app.locals.data = shootings;
     //console.dir(data[0])
@@ -101,6 +99,11 @@ Index.prototype.datapage = function datapage(req, res, next) {
       shooting.number = _i + 1;
     }
 
-    res.render('data', {year: req.params.year});
+    res.render('data', {
+      isAll: !req.params.year,
+      is2015: req.params.year === "2015",
+      is2014: req.params.year === "2014",
+      is2013: req.params.year === "2013"
+    });
   });
 }
