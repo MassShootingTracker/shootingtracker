@@ -157,6 +157,7 @@ class Data
                     ### store in redis with a one day TTL ###
                     redisClient.set(year, JSON.stringify(shootings))
                     redisClient.expire(year, redisTTL)
+
                     resolve(shootings)
                 )
               )
@@ -359,6 +360,7 @@ class Data
                   for year in ld.uniq(yearsInCSV)
                     deleteRedisKey(''+year)
                   deleteRedisKey('totals')
+                  deleteRedisKey('all')
                   logger.warn 'deleted redis keys'
                   resolve(n)
               )
