@@ -85,6 +85,7 @@
     "redis-mock": "^0.3.0",
     "request": "^2.64.0",
     "run-sequence": "^0.3.6",
+    "serve-favicon": "^2.3.0",
     "string": "^3.3.1",
     "vinyl-source-stream": "^1.1.0",
     "watchify": "^3.4.0",
