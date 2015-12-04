@@ -12,7 +12,9 @@
     "url": "mongodb://localhost:27017/mst"
   },
   "redis": {
-    "port": 6379
+    "port": 6379,
+    "auth_pass": "",
+    "host": "127.0.0.1"
   }
 }
 
