@@ -101,6 +101,11 @@ Index.prototype.datapage = function datapage(req, res, next) {
       shooting.number = _i + 1;
     }
 
-    res.render('data', {year: req.params.year });
+    res.render('data', {
+      isAll: !req.params.year,
+      is2015: req.params.year === "2015",
+      is2014: req.params.year === "2014",
+      is2013: req.params.year === "2013"
+    });
   });
 }

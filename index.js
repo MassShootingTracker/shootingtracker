@@ -4,6 +4,7 @@ var when = require('when');
 var express = require('express');
 var bodyParser = require('body-parser');
 var methodOverride = require('method-override');
+var favicon = require('serve-favicon');
 var config = require('./config');
 var exphbs = require('express-handlebars');
 
@@ -25,6 +26,7 @@ app.set('port', (process.env.PORT || config.app.port));
 app.set('hostname', (process.env.HOSTNAME || config.app.hostname));
 
 app.use(express.static('public'));
+app.use(favicon(__dirname + '/public/img/favicon.jpg'));
 
 app.use(bodyParser.urlencoded({extended:true}));
 app.use(bodyParser.json());

@@ -27,28 +27,30 @@ body, html {
       color: #ddd;
 
     }
-
-    span {
-      padding: 10px;
-      margin: 10px 0;
-      background-color: #000;
-      font-weight: bold;
-
-      &.first-letter {
-        background-color: #AD1919;
-        color: #efefef;
-        border-right: 1px solid #fff;
-      }
-
-      &.second-letter {
-        border-right: 1px solid #fff;
-      }
-    }
   }
 }
 
 .mst-logo {
   width: 150px;
+}
+
+.mst-data-page {
+
+  .mst-button-row {
+    margin-top: 20px;
+    margin-bottom: 20px;
+  }
+
+  li {
+    padding: 9px;
+  }
+
+  li.active {
+    background-color: #d9534f;
+    a {
+      color: #fff;
+    }
+  }
 }
 
 .container.mst-container-main {
