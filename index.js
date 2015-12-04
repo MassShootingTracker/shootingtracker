@@ -49,7 +49,9 @@ if (argv.refreshData) {
   .then(function(){
     app.locals.data = argv.refreshData ? shootingData : require('./data/shootings.json');
     app.locals.data.recentShootings = app.locals.data.shootings.slice(0, 5);
-    app.locals.downloadUrl = config['google-docs'].url;
+    app.locals.downloadUrl2013 = config.googleDocs['2013'];
+    app.locals.downloadUrl2014 = config.googleDocs['2014'];
+    app.locals.downloadUrl2015 = config.googleDocs['2015'];
   })
   .then(function() {
 

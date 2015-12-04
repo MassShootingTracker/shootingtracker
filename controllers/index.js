@@ -60,9 +60,6 @@ Index.prototype.register = function () {
     }
   });
 
-  this.app.get('/:year(\\d{4})/', function (req, res) {
-    datapage(req, res);
-  });
   (new Api(this.app)).register();
 }
 
