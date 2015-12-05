@@ -3,15 +3,15 @@
 <div class="container-fluid">
   <div class="container mst-container-main mst-data-page">
 
+    <div class="mst-button-row">
+      <a href="{{downloadUrl2015}}" class="btn btn-default"><i class="fa fa-download"></i> Download 2015 Data</a>
+      <a href="{{downloadUrl2014}}" class="btn btn-default"><i class="fa fa-download"></i> Download 2014 Data</a>
+      <a href="{{downloadUrl2013}}" class="btn btn-default"><i class="fa fa-download"></i> Download 2013 Data</a>
+    </div>
+
     <div class="row">
       <div class="col-sm-12">
         <ul class="list-inline">
-
-          {{#if isAll}}
-            <li class="active"><a href="/data">All</a></li>
-          {{else}}
-            <li><a href="/data">All</a></li>
-          {{/if}}
           {{#if is2015}}
             <li class="active" ><a href="/data/2015">2015</a></li>
           {{else}}
@@ -31,10 +31,8 @@
       </div>
     </div>
 
-    <div class="mst-button-row">
-        <a href="{{downloadUrl2015}}" class="btn btn-default"><i class="fa fa-download"></i> Download 2015 Data</a>
-        <a href="{{downloadUrl2014}}" class="btn btn-default"><i class="fa fa-download"></i> Download 2014 Data</a>
-        <a href="{{downloadUrl2013}}" class="btn btn-default"><i class="fa fa-download"></i> Download 2013 Data</a>
+    <div class="row">
+      <div id="mst-chart"></div>
     </div>
 
     <table class="table">
@@ -98,3 +96,8 @@ date: '2015-01-02T08:00:00.000Z' }
 </table>
 </div>
 </div>
+
+<script id="shooting-data">
+  window.data = {{{dataJson}}};
+  window.year = {{{year}}};
+</script>
