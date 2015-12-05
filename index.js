@@ -8,7 +8,6 @@ var favicon = require('serve-favicon');
 var config = require('./config');
 var exphbs = require('express-handlebars');
 
-
 var Controllers = require('./controllers');
 var Services = require('./services');
 var argv = require('yargs').argv;
