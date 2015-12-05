@@ -42,7 +42,7 @@
       if (config == null) {
         throw 'config is required!';
       }
-      this.redisPort = config.redis.port;
+      this.config = config;
       this.csvUrls = config.googleDocs;
       userpass = '';
       if (config.mongo.user != null) {
@@ -51,7 +51,11 @@
         }
         userpass = config.mongo.user + ":" + config.mongo.password + "@";
       }
-      this.mongoURL = "mongodb://" + userpass + config.mongo.url;
+      if (userpass) {
+        this.mongoURL = "mongodb://" + userpass + config.mongo.url;
+      } else {
+        this.mongoURL = config.mongo.url;
+      }
       if (this.logger == null) {
         this.logger = (require('bunyan'))({
           name: 'mst-data',
@@ -73,7 +77,11 @@
           if (_this.redisClient != null) {
             return resolve(_this.redisClient);
           } else {
-            redisClient = redis.createClient(_this.redisPort);
+            redisClient = redis.createClient({
+              port: _this.config.redis.port,
+              host: _this.config.redis.host,
+              auth_pass: _this.config.redis.auth_pass
+            });
             redisClient.on('connect', function() {
               _this.redisClient = redisClient;
               return resolve(redisClient);
@@ -454,6 +462,7 @@
                         deleteRedisKey('' + year);
                       }
                       deleteRedisKey('totals');
+                      deleteRedisKey('all');
                       logger.warn('deleted redis keys');
                       return resolve(n);
                     }
