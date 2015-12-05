@@ -102,8 +102,9 @@ Index.prototype.datapage = function datapage(req, res, next) {
     }
 
     res.render('data', {
-      isAll: !req.params.year,
-      is2015: req.params.year === "2015",
+      dataJson: JSON.stringify(shootings),
+      year: req.params.year || 2015,
+      is2015: !req.params.year || req.params.year === "2015",
       is2014: req.params.year === "2014",
       is2013: req.params.year === "2013"
     });
