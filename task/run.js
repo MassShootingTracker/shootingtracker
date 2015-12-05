@@ -1,6 +1,7 @@
 'use strict';
 
 var gulp = require('gulp');
+var path = require('path');
 var nodemon = require('gulp-nodemon');
 var shell = require('gulp-shell');
 var _ = require('lodash');
@@ -24,10 +25,27 @@ gulp.task('run:nodemon', function(callback) {
 
   var stream = nodemon({
     args: scriptArgs,
-    ignore: 'data/*',
-    ext: 'js json hbs',
+    ignore: ['data/*', '.tmp/*', 'services/data.js'],
+    watch: [
+      'controllers/',
+      'client/',
+      'views/',
+      'config/',
+      'task/',
+      'index.js'
+    ],
+    ext: 'js json hbs scss',
     nodeArgs: debugServer ? ['--debug'] : [],
     script: './index.js',
+    tasks: function (changedFiles) {
+      var tasks = []
+      changedFiles.forEach(function (file) {
+        if (path.extname(file) === '.scss' && !~tasks.indexOf('build:site:style')) tasks.push('build:site:style')
+        if (path.extname(file) === '.coffee' && !~tasks.indexOf('build:site:transpile')) tasks.push('build:site:transpile')
+        if (path.dirname(file).indexOf('client') > -1 && !~tasks.indexOf('build:site:script')) tasks.push('build:site:script')
+      })
+      return tasks;
+    },
     verbose: !!(yargs.verbose || yargs.V)
   });
 

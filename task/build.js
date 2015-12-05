@@ -116,7 +116,7 @@ exports.getSiteBundler = function getSiteBundler(entries, options) {
 gulp.task('build', function(callback) {
 
   var build = [
-      'build:site:transpile',
+    'build:site:transpile',
     'build:site:image',
     'build:site:video',
     'build:site:font',
@@ -140,14 +140,13 @@ gulp.task('build', function(callback) {
 
 });
 
-
 gulp.task('build:site:transpile', function(){
   return gulp.src(['**/*.coffee','!node_modules/**']).pipe(
       debug({title: 'coffee files:'})).pipe(
       coffee().on('error', gutil.log)).pipe(
       debug({title: 'transpiled files:'})).pipe(
       gulp.dest('.'))
-})
+});
 
 gulp.task('build:site:image', function () {
   return gulp.src(['client/img/**/*.*'], {base: 'client/img'})
