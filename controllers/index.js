@@ -112,7 +112,7 @@ Index.prototype.datapage = function datapage(req, res, next) {
     for (_i = 0, _len = shootings.length; _i < _len; _i++) {
       shooting = shootings[_i];
       shooting.displayDate = new moment(shooting.date).format("MM/DD/YYYY");
-      shooting.number = _i + 1;
+      shooting.number = shootings.length - _i;
     }
 
     res.render('data', {
