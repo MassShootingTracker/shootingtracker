@@ -105,18 +105,6 @@
         return done();
       });
     });
-    it('should get the sheet data', function(done) {
-      var dl;
-      dl = getDataLayer();
-      dl.should.be;
-      return dl.pullSheetData(2015)["catch"](function(err) {
-        throw err;
-      }).done(function(count) {
-        count.should.be;
-        count.should.be.gt(-1);
-        return done();
-      });
-    });
     return it('should throw when no config', function() {
       var f;
       f = function() {
