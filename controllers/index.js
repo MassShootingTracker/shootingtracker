@@ -65,22 +65,33 @@ Index.prototype.register = function () {
 
 Index.prototype.home = function home(req, res, next) {
 
-  var currentYear = String((new Date()).getFullYear());
-  res.locals.data = {};
+  var year = String(new Date().getFullYear());
 
-  res.locals.data.currentYearTotal = 0;
-  res.locals.data.totals = null;
+  dataLayer.getByYear(year).then(function (shootings) {
 
-  dataLayer.getTotals().then(function (totals) {
+    res.locals.data = {
+      recentShootings: [],
+      currentYear: year,
+      currentYearTotal: shootings.length,
+      daysSince: '',
+      daysLabel: 'days'
+    };
 
-    res.locals.data = totals;
-    res.locals.data.currentYear = currentYear;
-    res.locals.data.currentYearTotal = totals[currentYear];
+    if (shootings && shootings.length) {
 
-    var i, len, shooting;
-    for (i = 0, len = res.locals.data.mostRecent.length; i < len; i++) {
-      shooting = res.locals.data.mostRecent[i];
-      shooting.displayDate = new moment(shooting.date).format("MM/DD/YYYY");
+      var shooting;
+
+      for (var i = 0; i < Math.min(5, shootings.length); i++) {
+
+        shooting = shootings[i];
+        shooting.displayDate = new moment(shooting.date).format('MM/DD/YYYY');
+        res.locals.data.recentShootings.push(shooting);
+
+      }
+
+      var daysSince = moment().diff(moment(shootings[0].date), 'days');
+      res.locals.data.daysSince = daysSince;
+      res.locals.data.daysLabel = daysSince === 1 ? 'day' : 'days';
     }
 
   })
