@@ -87,17 +87,6 @@ describe 'GoogleDocs / Redis / Mongo Integration', ->
       done()
     )
 
-  it 'should get the sheet data', (done)->
-    dl = getDataLayer()
-    dl.should.be
-    dl.pullSheetData(2015).catch((err) ->
-      throw err
-    ).done((count) ->
-      count.should.be
-      count.should.be.gt(-1)
-      done()
-    )
-
   it 'should throw when no config', ->
     f = -> new (require(path.join(process.cwd(),'./services/data.js' ))).Data()
     f.should.throw(/config is required/)
