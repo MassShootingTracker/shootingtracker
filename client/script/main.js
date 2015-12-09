@@ -51,8 +51,8 @@ function initChart() {
     killedMonthSeries[month].y += shooting.killed;
     woundedMonthSeries[month].y += shooting.wounded;
 
-    woundedDrilldownSeries[month].data.push([shooting.displayDate, shooting.wounded]);
-    killedDrilldownSeries[month].data.push([shooting.displayDate, shooting.killed]);
+    woundedDrilldownSeries[month].data.unshift([shooting.displayDate, shooting.wounded]);
+    killedDrilldownSeries[month].data.unshift([shooting.displayDate, shooting.killed]);
   });
 
   $chartContainer.highcharts({
