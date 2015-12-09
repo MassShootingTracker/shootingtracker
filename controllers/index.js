@@ -64,18 +64,32 @@ Index.prototype.register = function () {
 }
 
 Index.prototype.home = function home(req, res, next) {
-  dataLayer.getTotals().then(function (data) {
-    app.locals.data = data;
-    if (data != null) {
 
-      var _i, _len, shooting;
-      for (_i = 0, _len = data.mostRecent.length; _i < _len; _i++) {
-        shooting = data.mostRecent[_i];
+  var currentYear = String((new Date()).getFullYear());
+  res.locals.data = {};
+  res.locals.data.currentYear = currentYear;
+  res.locals.data.currentYearTotal = 0;
+
+  dataLayer.getByYear(currentYear).then(function (shootings) {
+
+    //app.locals.data = shootings;
+    res.locals.data.recentShootings = [];
+    res.locals.data.currentYearTotal = shootings.length;
+
+    res.locals.data.daysSince = 'NaN';
+
+    if (shootings != null) {
+
+      var shooting;
+
+      res.locals.data.daysSince = (moment()).diff(moment(shootings[0].date), 'days');
+
+      for (var i = 0; i < 5; i++) {
+        shooting = shootings[i];
         shooting.displayDate = new moment(shooting.date).format("MM/DD/YYYY");
+        res.locals.data.recentShootings.push(shooting);
       }
 
-      data.currentYear = new Date().getFullYear();
-      data.currentYearTotal = data[data.currentYear];
     }
 
     res.render('index');
