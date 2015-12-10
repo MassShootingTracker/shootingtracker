@@ -67,39 +67,34 @@ Index.prototype.home = function home(req, res, next) {
 
   var currentYear = String((new Date()).getFullYear());
   res.locals.data = {};
-  res.locals.data.currentYear = currentYear;
+
   res.locals.data.currentYearTotal = 0;
+  res.locals.data.totals = null;
 
-  dataLayer.getByYear(currentYear).then(function (shootings) {
+  dataLayer.getTotals().then(function (totals) {
 
-    //app.locals.data = shootings;
-    res.locals.data.recentShootings = [];
-    res.locals.data.currentYearTotal = shootings.length;
+    res.locals.data = totals;
+    res.locals.data.currentYear = currentYear;
+    res.locals.data.currentYearTotal = totals[currentYear];
 
-    res.locals.data.daysSince = 'NaN';
-
-    if (shootings != null) {
-
-      var shooting;
-
-      res.locals.data.daysSince = (moment()).diff(moment(shootings[0].date), 'days');
-
-      for (var i = 0; i < 5; i++) {
-        shooting = shootings[i];
-        shooting.displayDate = new moment(shooting.date).format("MM/DD/YYYY");
-        res.locals.data.recentShootings.push(shooting);
-      }
-
+    var i, len, shooting;
+    for (i = 0, len = res.locals.data.mostRecent.length; i < len; i++) {
+      shooting = res.locals.data.mostRecent[i];
+      shooting.displayDate = new moment(shooting.date).format("MM/DD/YYYY");
     }
 
+  })
+  .then(function () {
+
     res.render('index');
+
   });
 
-}
+};
 
 Index.prototype.aboutus = function aboutus(req, res, next) {
   res.render('aboutus');
-}
+};
 
 Index.prototype.datapage = function datapage(req, res, next) {
 

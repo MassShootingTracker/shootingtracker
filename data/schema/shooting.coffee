@@ -1,7 +1,8 @@
 mongoose = require('mongoose')
 
 shooting = new mongoose.Schema({
-  date: { type: Date, default: Date.now, index: true},
+  date: Date,
+  year: {type: Number, index: true}
   city: String,
   state: String,
   perpetrators: [{name: String}],
