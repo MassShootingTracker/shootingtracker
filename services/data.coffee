@@ -228,8 +228,7 @@ class Data
                       for year in [startYear..currentYear]
                         years.push(year)
                         do (year) ->
-                          Shooting.count(
-                            date: {$gte: new Date(year, 1, 1), $lte: new Date(year, 12, 31)}).exec((err, count) ->
+                          Shooting.count({year: year}).exec((err, count) ->
                             if err?
                               reject(err)
                               return
