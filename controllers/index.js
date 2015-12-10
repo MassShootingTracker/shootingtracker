@@ -28,36 +28,26 @@ Index.prototype.register = function () {
   this.app.get('/data', this.datapage);
   this.app.get('/data/:year', this.datapage);
 
-  this.app.post('/update', function (req, res) {
+  this.app.post('/update', function (req, res, next) {
 
     logger.debug('attempting update');
 
-    if (req.body.key == config.app.apiKey) {
-
-      logger.debug("api key correct, starting update");
-      var year = req.body.year || '' + new Date().getFullYear();
-
-      dataLayer.pullSheetData(year)["catch"](function (err) {
-        res.status(500).send('Failed');
-        logger.error("failed to pull sheet data:");
-        logger.error(err);
-        throw err;
-      }).then(function (sheet) {
-
-        dataLayer.updateFromCSV(sheet)["catch"](function (err) {
-          throw err;
-        }).then(function (results) {
-          logger.debug("new record count", {c:results});
-        })
-
-      }).done(function (results) {
-        res.status(200).send('Done')
-      });
-
-    } else {
+    if (req.body.key !== config.app.apiKey) {
       logger.error("posted key incorrect: got:" + req.body.key + " expected:" + config.app.apiKey);
-      res.status(403).send('Invalid Key');
+      return res.status(403).send('Invalid Key');
     }
+
+    logger.debug("api key correct, starting update");
+    var year = req.body.year || '' + new Date().getFullYear();
+
+    dataLayer.pullSheetData(year)
+      .then(function (sheet) {
+        return dataLayer.updateFromCSV(sheet);
+      })
+      .then(function (results) {
+        res.status(200).send('Done')
+      })
+      .catch(next);
   });
 
   (new Api(this.app)).register();
@@ -65,30 +55,43 @@ Index.prototype.register = function () {
 
 Index.prototype.home = function home(req, res, next) {
 
-  var currentYear = String((new Date()).getFullYear());
-  res.locals.data = {};
+  var year = String(new Date().getFullYear());
 
-  res.locals.data.currentYearTotal = 0;
-  res.locals.data.totals = null;
+  res.locals.data = {
+    mostRecent: [],
+    currentYear: year,
+    totalCurrentYear: '',
+    totalAllYears: '',
+    daysSince: '',
+    daysLabel: 'days'
+  };
 
-  dataLayer.getTotals().then(function (totals) {
+  dataLayer.getTotals()
+    .then(function (totals) {
 
-    res.locals.data = totals;
-    res.locals.data.currentYear = currentYear;
-    res.locals.data.currentYearTotal = totals[currentYear];
+      if (!totals) {
+        return;
+      }
 
-    var i, len, shooting;
-    for (i = 0, len = res.locals.data.mostRecent.length; i < len; i++) {
-      shooting = res.locals.data.mostRecent[i];
-      shooting.displayDate = new moment(shooting.date).format("MM/DD/YYYY");
-    }
+      totals.mostRecent = _.map(totals.mostRecent, function(shooting) {
+        shooting.displayDate = new moment(shooting.date).format('MM/DD/YYYY');
+        return shooting;
+      });
 
-  })
-  .then(function () {
+      res.locals.data = {
+        mostRecent: totals.mostRecent,
+        currentYear: year,
+        totalCurrentYear: totals['2015'],
+        totalAllYears: totals.totalAllYears,
+        daysSince: totals.daysSince,
+        daysLabel: totals.daysSince === 1 ? 'day' : 'days'
+      };
 
-    res.render('index');
-
-  });
+    })
+    .then(function(){
+      res.render('index');
+    })
+    .catch(next);
 
 };
 
@@ -98,8 +101,10 @@ Index.prototype.aboutus = function aboutus(req, res, next) {
 
 Index.prototype.datapage = function datapage(req, res, next) {
 
-  config.logger.debug('building datapage with param: ' + req.params.year);
-  dataLayer.getByYear(req.params.year).then(function (shootings) {
+  var year = req.params.year || String(new Date().getFullYear());
+
+  config.logger.debug('building datapage with param: ' + year);
+  dataLayer.getByYear(year).then(function (shootings) {
     app.locals.data = shootings;
     //console.dir(data[0])
 
@@ -112,10 +117,11 @@ Index.prototype.datapage = function datapage(req, res, next) {
 
     res.render('data', {
       dataJson: JSON.stringify(shootings),
-      year: req.params.year || 2015,
-      is2015: !req.params.year || req.params.year === "2015",
-      is2014: req.params.year === "2014",
-      is2013: req.params.year === "2013"
+      year: year,
+      is2015: year === "2015",
+      is2014: year === "2014",
+      is2013: year === "2013"
     });
-  });
+  })
+  .catch(next);
 }
