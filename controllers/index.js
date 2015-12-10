@@ -28,36 +28,26 @@ Index.prototype.register = function () {
   this.app.get('/data', this.datapage);
   this.app.get('/data/:year', this.datapage);
 
-  this.app.post('/update', function (req, res) {
+  this.app.post('/update', function (req, res, next) {
 
     logger.debug('attempting update');
 
-    if (req.body.key == config.app.apiKey) {
-
-      logger.debug("api key correct, starting update");
-      var year = req.body.year || '' + new Date().getFullYear();
-
-      dataLayer.pullSheetData(year)["catch"](function (err) {
-        res.status(500).send('Failed');
-        logger.error("failed to pull sheet data:");
-        logger.error(err);
-        throw err;
-      }).then(function (sheet) {
-
-        dataLayer.updateFromCSV(sheet)["catch"](function (err) {
-          throw err;
-        }).then(function (results) {
-          logger.debug("new record count", {c:results});
-        })
-
-      }).done(function (results) {
-        res.status(200).send('Done')
-      });
-
-    } else {
+    if (req.body.key !== config.app.apiKey) {
       logger.error("posted key incorrect: got:" + req.body.key + " expected:" + config.app.apiKey);
-      res.status(403).send('Invalid Key');
+      return res.status(403).send('Invalid Key');
     }
+
+    logger.debug("api key correct, starting update");
+    var year = req.body.year || '' + new Date().getFullYear();
+
+    dataLayer.pullSheetData(year)
+      .then(function (sheet) {
+        return dataLayer.updateFromCSV(sheet);
+      })
+      .then(function (results) {
+        res.status(200).send('Done')
+      })
+      .catch(next);
   });
 
   (new Api(this.app)).register();
@@ -67,39 +57,41 @@ Index.prototype.home = function home(req, res, next) {
 
   var year = String(new Date().getFullYear());
 
-  dataLayer.getByYear(year).then(function (shootings) {
+  res.locals.data = {
+    mostRecent: [],
+    currentYear: year,
+    totalCurrentYear: '',
+    totalAllYears: '',
+    daysSince: '',
+    daysLabel: 'days'
+  };
 
-    res.locals.data = {
-      recentShootings: [],
-      currentYear: year,
-      currentYearTotal: shootings.length,
-      daysSince: '',
-      daysLabel: 'days'
-    };
+  dataLayer.getTotals()
+    .then(function (totals) {
 
-    if (shootings && shootings.length) {
-
-      var shooting;
-
-      for (var i = 0; i < Math.min(5, shootings.length); i++) {
-
-        shooting = shootings[i];
-        shooting.displayDate = new moment(shooting.date).format('MM/DD/YYYY');
-        res.locals.data.recentShootings.push(shooting);
-
+      if (!totals) {
+        return;
       }
 
-      var daysSince = moment().diff(moment(shootings[0].date), 'days');
-      res.locals.data.daysSince = daysSince;
-      res.locals.data.daysLabel = daysSince === 1 ? 'day' : 'days';
-    }
+      totals.mostRecent = _.map(totals.mostRecent, function(shooting) {
+        shooting.displayDate = new moment(shooting.date).format('MM/DD/YYYY');
+        return shooting;
+      });
 
-  })
-  .then(function () {
+      res.locals.data = {
+        mostRecent: totals.mostRecent,
+        currentYear: year,
+        totalCurrentYear: totals['2015'],
+        totalAllYears: totals.totalAllYears,
+        daysSince: totals.daysSince,
+        daysLabel: totals.daysSince === 1 ? 'day' : 'days'
+      };
 
-    res.render('index');
-
-  });
+    })
+    .then(function(){
+      res.render('index');
+    })
+    .catch(next);
 
 };
 
@@ -130,5 +122,6 @@ Index.prototype.datapage = function datapage(req, res, next) {
       is2014: year === "2014",
       is2013: year === "2013"
     });
-  });
+  })
+  .catch(next);
 }
