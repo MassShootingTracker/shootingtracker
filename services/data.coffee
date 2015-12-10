@@ -270,83 +270,83 @@ class Data
         logger.warn "no shootings element found in CSV data; ignoring"
         resolve(0)
 
-      @connectToMongo().then(
-        Shooting.find(year: +year).remove()
-      ).then((conn) ->
-        try
-          logger.debug 'connected to mongo; pushing new values into db'
-          ref = data
-          total = data.length
-          checked = 0
-          n = 0
-          i = 0
-          len = ref.length
+      @connectToMongo()
+        .then(() => Shooting.find(year: +year).remove())
+        .then((conn) ->
+          try
+            logger.debug 'connected to mongo; pushing new values into db'
+            ref = data
+            total = data.length
+            checked = 0
+            n = 0
+            i = 0
+            len = ref.length
 
-          while i < len
+            while i < len
 
-            ###
-            sample:
-            { date: '9/20/2015',
-             name: 'Unknown',
-             killed: 0,
-             wounded: 6,
-             city: 'Tulsa',
-             state: 'OK',
-             synopsis: '',
-             guns_info: '',
-             other_info: '',
-             sources_semicolon_delimited: 'http://www.newson6.com/story/30072412/six-shot-outside-tulsa-nightclub' },
+              ###
+              sample:
+              { date: '9/20/2015',
+               name: 'Unknown',
+               killed: 0,
+               wounded: 6,
+               city: 'Tulsa',
+               state: 'OK',
+               synopsis: '',
+               guns_info: '',
+               other_info: '',
+               sources_semicolon_delimited: 'http://www.newson6.com/story/30072412/six-shot-outside-tulsa-nightclub' },
 
-            ###
-            d = ref[i]
-            entry = new Shooting
+              ###
+              d = ref[i]
+              entry = new Shooting
 
-            # we're just assuming east coast time here; actual times aren't important, just dates
-            # this is so entries on 12/31 don't fall in to the next year
-            entry.date = moment.tz(d.date, 'MM/DD/YYYY', "America/Los_Angeles").format()
-            entry.year = +entry.date.getFullYear()
-            entry.killed = d.killed
-            entry.city = d.city
-            entry.wounded = d.wounded
-            entry.city = d.city
-            entry.state = d.state
+              # we're just assuming east coast time here; actual times aren't important, just dates
+              # this is so entries on 12/31 don't fall in to the next year
+              entry.date = moment.tz(d.date, 'MM/DD/YYYY', "America/Los_Angeles").format()
+              entry.year = +entry.date.getFullYear()
+              entry.killed = d.killed
+              entry.city = d.city
+              entry.wounded = d.wounded
+              entry.city = d.city
+              entry.state = d.state
 
-            if d.sources_semicolon_delimited.indexOf(';') > -1
-              # filter out empty sources
-              entry.sources = ld.filter(d.sources_semicolon_delimited.split(';'), (x) -> !!x.length)
-            else
-              entry.sources = d.sources_semicolon_delimited
+              if d.sources_semicolon_delimited.indexOf(';') > -1
+                # filter out empty sources
+                entry.sources = ld.filter(d.sources_semicolon_delimited.split(';'), (x) -> !!x.length)
+              else
+                entry.sources = d.sources_semicolon_delimited
 
-            if d.name_semicolon_delimited.indexOf(';') > -1
-              d.name_semicolon_delimited.split(';').forEach((p) -> entry.perpetrators.push({name: p}))
-            else
-              entry.perpetrators = [{name: d.name_semicolon_delimited}]
+              if d.name_semicolon_delimited.indexOf(';') > -1
+                d.name_semicolon_delimited.split(';').forEach((p) -> entry.perpetrators.push({name: p}))
+              else
+                entry.perpetrators = [{name: d.name_semicolon_delimited}]
 
-            logger.trace "entry": entry
-            yearsInCSV.push(entry.date.getFullYear())
-            ###
-             find any entries on this data with the same city and state and at least one matching source
-             if found, delete and re-create
-             else just save each one
-            ###
+              logger.trace "entry": entry
+              yearsInCSV.push(entry.date.getFullYear())
+              ###
+               find any entries on this data with the same city and state and at least one matching source
+               if found, delete and re-create
+               else just save each one
+              ###
 
-            entry.save()
-            ++checked
-            if checked == total
-              logger.warn "'done writing data to Mongo: #{n} records'"
-              logger.info 'deleting redis keys'
-              for year in ld.uniq(yearsInCSV)
-                deleteRedisKey('' + year)
-              deleteRedisKey('totals')
-              deleteRedisKey('all')
-              logger.warn 'deleted redis keys'
-              resolve(n)
+              entry.save()
+              ++checked
+              if checked == total
+                logger.warn "'done writing data to Mongo: #{n} records'"
+                logger.info 'deleting redis keys'
+                for year in ld.uniq(yearsInCSV)
+                  deleteRedisKey('' + year)
+                deleteRedisKey('totals')
+                deleteRedisKey('all')
+                logger.warn 'deleted redis keys'
+                resolve(n)
 
-            i++
+              i++
 
-        catch e
-          reject(e)
-      ).catch((err) -> reject(err))
+          catch e
+            reject(e)
+        ).catch((err) -> reject(err))
 
     return promise
 
