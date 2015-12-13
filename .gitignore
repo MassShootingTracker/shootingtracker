@@ -8,3 +8,6 @@ public/
 /dump.rdb
 data/shootings.json
 data/schema/shooting.js
+/services/index.js
+/services/data.js
+/test/integration/redisMongoDocs.js √
