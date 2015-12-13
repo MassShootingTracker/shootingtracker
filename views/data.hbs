@@ -2,16 +2,21 @@
 
 <div class="container-fluid">
   <div class="container mst-container-main mst-data-page">
+
+    <div class="mst-button-row">
+      <a href="https://www.reddit.com/message/compose?to=%2Fr%2Fgunsarecool&subject=Mass%20Shooting%20Tracker%20data&message=" class="btn btn-default" target="_blank"><i class="fa fa-download"></i> Full data set available upon request.</a>
+    </div>
+
     <div class="row">
       <div class="col-sm-12">
         <ul class="list-inline">
           {{#if is2015}}
-            <li class="active"><a href="/data/2015">2015</a></li>
+            <li class="active" ><a href="/data/2015">2015</a></li>
           {{else}}
             <li><a href="/data/2015">2015</a></li>
           {{/if}}
           {{#if is2014}}
-            <li class="active"><a href="/data/2014">2014</a></li>
+            <li class="active"><a  href="/data/2014">2014</a></li>
           {{else}}
             <li><a href="/data/2014">2014</a></li>
           {{/if}}
@@ -30,64 +35,64 @@
 
     <table class="table">
       <thead>
-      <tr>
-        <th>#</th>
-        <th>Date</th>
-        <th>Location</th>
-        <th>Dead</th>
-        <th>Injured</th>
-        <th>Shooter(s)</th>
-        <th>News articles</th>
-      </tr>
+        <tr>
+          <th>#</th>
+          <th>Date</th>
+          <th>Location</th>
+          <th>Dead</th>
+          <th>Injured</th>
+          <th>Shooter(s)</th>
+          <th>News articles</th>
+        </tr>
       </thead>
 
-      {{!--
-      sample record:
+{{!--
+sample record:
 
-      { _id: '56241713111497a82e69a1d5',
-      state: 'GA',
-      city: 'Savannah',
-      __v: 0,
-      flagged: [],
-      sources: [ 'http://savannahnow.com/crime/2015-01-02/police-1-dead-4-injured-overnight-savannah-shooting' ],
-      categories: [],
-      comments: [],
-      wounded: 4,
-      killed: 1,
-      perpetrators: [ { name: 'Unknown', _id: '56241713111497a82e69a1d6' } ],
-      date: '2015-01-02T08:00:00.000Z' }
+{ _id: '56241713111497a82e69a1d5',
+state: 'GA',
+city: 'Savannah',
+__v: 0,
+flagged: [],
+sources: [ 'http://savannahnow.com/crime/2015-01-02/police-1-dead-4-injured-overnight-savannah-shooting' ],
+categories: [],
+comments: [],
+wounded: 4,
+killed: 1,
+perpetrators: [ { name: 'Unknown', _id: '56241713111497a82e69a1d6' } ],
+date: '2015-01-02T08:00:00.000Z' }
 
-      --}}
+--}}
 
-      <tbody>
-      {{#each data}}
-        <tr>
-          <td>{{number}}</td>
-          <td>{{displayDate}}</td>
-          <td>{{city}},&nbsp;{{state}}</td>
-          <td>{{killed}}</td>
-          <td>{{wounded}}</td>
-          <td>
-            {{#each perpetrators}}
-              <div>{{name}}</div>
-            {{/each}}
-          </td>
-          <td>
-            <ul class="list-inline">
-              {{#each sources}}
-                <li style="float:left; margin-right:10px;">
-                  <a target="_blank" href="{{this}}" title="{{this}}"><i class="fa fa-external-link"></i></a>
-                </li>
-              {{/each}}
-            </ul>
-          </td>
-        </tr>
-      {{/each}}
+<tbody>
+ {{#each data}}
+ <tr>
+   <td>{{number}}</td>
+   <td>{{displayDate}}</td>
+   <td>{{city}},&nbsp;{{state}}</td>
+   <td>{{killed}}</td>
+   <td>{{wounded}}</td>
+   <td>
+     {{#each perpetrators}}
+     <div>{{name}}</div>
+     {{/each}}
+   </td>
+   <td>
+      <ul class="list-inline">
+     {{#each sources}}
+       <li style="float:left; margin-right:10px;">
+         <a target="_blank" href="{{this}}" title="{{this}}"><i class="fa fa-external-link"></i></a>
+       </li>
+     {{/each}}
+     </ul>
+   </td>
+ </tr>
+ {{/each}}
 
-      </tbody>
+</tbody>
 
-    </table>
-  </div>
+</table>
+</div>
 </div>
 
 <script id="shooting-data">
