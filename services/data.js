@@ -309,10 +309,7 @@
                             years.push(year);
                             results.push((function(year) {
                               return Shooting.count({
-                                date: {
-                                  $gte: new Date(year, 1, 1),
-                                  $lte: new Date(year, 12, 31)
-                                }
+                                year: year
                               }).exec(function(err, count) {
                                 var daysThisYear, k, len1, n;
                                 if (err != null) {
@@ -367,9 +364,11 @@
             logger.warn("no shootings element found in CSV data; ignoring");
             resolve(0);
           }
-          return _this.connectToMongo().then(Shooting.find({
-            year: +year
-          }).remove()).then(function(conn) {
+          return _this.connectToMongo().then(function() {
+            return Shooting.find({
+              year: +year
+            }).remove();
+          }).then(function(conn) {
             var checked, d, e, entry, error, i, j, len, len1, n, ref, ref1, results, total;
             try {
               logger.debug('connected to mongo; pushing new values into db');

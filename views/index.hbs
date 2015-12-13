@@ -11,11 +11,11 @@
 
       <h1><span class="label label-danger">{{data.totalCurrentYear}}</span> U.S. mass shootings in {{data.currentYear}}</h1>
       <h1><span class="label label-danger">{{data.totalAllYears}}</span> mass shootings since 1/1/2013</h1>
-      <h1><span class="label label-danger">{{data.daysSince}}</span> days since last mass shooting</h1>
+      <h1><span class="label label-danger">{{data.daysSince}}</span> {{data.daysLabel}} since last mass shooting</h1>
 
       <p class="mst-shooting-definition">
         The Mass Shooting Tracker is a crowd sourced database of U.S. mass shootings. We define a "mass shooting" as a
-        single outburst of violence in which four or more people are shot. <a href="/about">Learn More.</a>
+        single outburst of violence in which four or more people are shot and/or killed. This is not the same as mass murder as defined by the FBI. <a href="/about">Learn more here.</a>
       </p>
 
       {{>recentshootings}}

@@ -87,6 +87,7 @@ Index.prototype.home = function home(req, res, next) {
         daysLabel: totals.daysSince === 1 ? 'day' : 'days'
       };
 
+    config.logger.debug({data: res.locals.data});
     })
     .then(function(){
       res.render('index');
