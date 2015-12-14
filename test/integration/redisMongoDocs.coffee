@@ -7,6 +7,7 @@ should = chai.should()
 expect = chai.expect
 sinon = require('sinon')
 path = require 'path'
+Data = require('../../services/data.js').Data
 
 describe 'GoogleDocs / Redis / Mongo Integration', ->
 
@@ -28,9 +29,9 @@ describe 'GoogleDocs / Redis / Mongo Integration', ->
     throw err
 
   getDataLayer = ->
-    config = require(path.join(process.cwd(),'./config' ))
+    config = require('../../config' )
     logger = new (require 'bunyan')({name: 'errors', level: 50})
-    return new (require(path.join(process.cwd(),'./services/data.js' ))).Data(config, logger)
+    return new Data(config, logger)
 
   it 'should get the redis client', (done)->
     dl = getDataLayer()
@@ -88,5 +89,5 @@ describe 'GoogleDocs / Redis / Mongo Integration', ->
     )
 
   it 'should throw when no config', ->
-    f = -> new (require(path.join(process.cwd(),'./services/data.js' ))).Data()
+    f = -> new Data()
     f.should.throw(/config is required/)
