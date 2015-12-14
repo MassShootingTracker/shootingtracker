@@ -4,13 +4,14 @@ var _ = require('lodash');
 var Api = require('./api');
 var path = require('path');
 var moment = require('moment');
-var config = require(path.join(process.cwd(), './config'))
+var config = require('../config');
+var Data = require('../services/data.js').Data;
 var dataLayer = null;
 var app = null
 
 function Index(appArg) {
   this.app = appArg;
-  dataLayer = new (require(path.join(process.cwd(), './services/data.js'))).Data(config, config.logger);
+  dataLayer = new Data(config, config.logger);
   app = this.app;
   _.bindAll(this, 'home');
 }
