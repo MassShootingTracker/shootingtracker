@@ -1,6 +1,6 @@
 {
   "app": {
-    "port": 3000,
+    "port": 3030,
     "apiKey": "fkjnwkj2nk3r43tklnf4al"
   },
   "googleDocs": {

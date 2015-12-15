@@ -7,7 +7,10 @@ public/
 .npmrc
 /dump.rdb
 data/shootings.json
+/data/schema/reference.js
 data/schema/shooting.js
 /services/index.js
 /services/data.js
+/services/webCapture.js
+/services/archive_is.js
 /test/integration/redisMongoDocs.js

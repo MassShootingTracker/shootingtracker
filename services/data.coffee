@@ -11,8 +11,8 @@ nodefn = require('when/node')
 request = require('request')
 Converter = require('csvtojson').Converter
 ld = require 'lodash'
-
-debugger
+webCapture = new (require './webCapture')()
+archiver = new (require './archive_is')()
 
 class Data
 
@@ -363,8 +363,37 @@ class Data
         if err
           reject err
         logger.debug "csv records count": result.length
-        resolve result
     promise
+    resolve result
+
+  archiveUrl: (url) =>
+
+    promise = w.promise (resolve, reject) =>
+      # check archive.is for this url
+      archiver.check url, (err, result) ->
+        logger.debug "checked url: #{url}"
+        if hadError(err) then reject(err)
+        if not result.found
+          # save AIS for this url
+          logger.trace "saving url with archive.is"
+
+          archiver.save(url, (err, archiveUrl) ->
+            if hadError(err) then reject(err)
+            # capture shot of this url
+            logger.trace "capturing screenshot for url"
+            webCapture.capture(url, (err, path) ->
+              reject(err) if err?
+              else
+                logger.trace('capture complete')
+                ref = new Reference(url: url, archiveUrl: archiveUrl, screenshotPath: path)
+                resolve(true)
+            )
+          )
+        else
+          logger.debug "Archive has url, no capture needed."
+          resolve(true)
+
+    return promise
 
   pullSheetData: (year) =>
     this.timeout = 5000
@@ -378,6 +407,9 @@ class Data
         (data) ->  {data: data, year: year }
       ).then(
         @updateFromCSV
+      ).then( (result) =>
+        # TODO parallel
+        archiveUrl(result)
       ).then(
         (result) =>
           @logger.debug "data pull complete: #{result}"

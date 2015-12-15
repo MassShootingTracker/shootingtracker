@@ -11,7 +11,7 @@
     "node": "~0.12.0"
   },
   "scripts": {
-    "prestart":"npm test",
+    "prestart": "npm test",
     "test": "mocha test/integration/redisMongoDocs.js",
     "start": "gulp build run",
     "postinstall": "gulp build && npm test"
@@ -93,6 +93,7 @@
     "string": "^3.3.1",
     "vinyl-source-stream": "^1.1.0",
     "watchify": "^3.4.0",
+    "webshot": "^0.16.0",
     "when": "^3.3.1",
     "yargs": "^1.2.1"
   },
