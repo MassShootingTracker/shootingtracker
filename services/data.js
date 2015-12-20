@@ -1,5 +1,5 @@
 (function() {
-  var Converter, Data, Shooting, callbacks, ld, moment, mongoose, node, nodefn, redis, redisTTL, request, w,
+  var Converter, Data, Reference, Shooting, archiver, callbacks, ld, logger, moment, mongoose, node, nodefn, parallel, redis, redisTTL, request, w, webCapture,
     bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
   w = require('when');
@@ -12,9 +12,13 @@
 
   Shooting = require('.././data/schema/shooting');
 
+  Reference = require('.././data/schema/reference');
+
   redis = require('redis');
 
   moment = require('moment-timezone');
+
+  parallel = require('when/parallel');
 
   redisTTL = 1 * 60 * 60;
 
@@ -26,13 +30,19 @@
 
   ld = require('lodash');
 
-  debugger;
+  webCapture = null;
+
+  archiver = null;
+
+  logger = null;
 
   Data = (function() {
     function Data(config, logger1) {
       var ref1, userpass;
       this.logger = logger1;
       this.pullSheetData = bind(this.pullSheetData, this);
+      this.processArchives = bind(this.processArchives, this);
+      this.archiveUrls = bind(this.archiveUrls, this);
       this.csvToJSON = bind(this.csvToJSON, this);
       this.updateFromCSV = bind(this.updateFromCSV, this);
       this.getTotals = bind(this.getTotals, this);
@@ -44,6 +54,8 @@
       if (config == null) {
         throw 'config is required!';
       }
+      webCapture = new (require('./webCapture'))(null, this.logger);
+      archiver = new (require('./archive_is'))(this.logger);
       this.config = config;
       this.csvUrls = config.googleDocs;
       userpass = '';
@@ -64,6 +76,7 @@
           level: (((ref1 = config.logging) != null ? ref1.level : void 0) != null) || 10
         });
       }
+      logger = this.logger;
       process.on('unhandledRejection', (function(_this) {
         return function(reason, p) {
           return _this.logger.error('Possibly Unhandled Rejection at: Promise ', p, ' reason: ', reason);
@@ -99,7 +112,7 @@
     };
 
     Data.prototype.connectToMongo = function() {
-      var logger, promise;
+      var promise;
       logger = this.logger;
       promise = w.promise((function(_this) {
         return function(resolve, reject) {
@@ -162,7 +175,7 @@
     };
 
     Data.prototype.getByYear = function(year) {
-      var getMongoConn, logger, promise, redisURL;
+      var getMongoConn, promise, redisURL;
       if (year == null) {
         year = 'all';
       }
@@ -243,7 +256,7 @@
       var promise;
       promise = w.promise((function(_this) {
         return function(resolve, reject) {
-          var getMongoConn, key, logger, startYear;
+          var getMongoConn, key, startYear;
           logger = _this.logger;
           logger.debug('connecting to redis');
           key = 'totals';
@@ -350,25 +363,31 @@
     };
 
     Data.prototype.updateFromCSV = function(input) {
-      var data, deleteRedisKey, logger, promise, year, yearsInCSV;
+      var data, deleteRedisKey, promise, year, yearsInCSV;
       logger = this.logger;
       logger.trace("starting update from csv");
       yearsInCSV = [];
       data = input.data, year = input.year;
+      logger.debug("data sample");
+      if ((data != null ? data[0] : void 0) != null) {
+        logger.debug({
+          dataSample: data[0]
+        });
+      }
       deleteRedisKey = this.deleteRedisKey;
       promise = w.promise((function(_this) {
         return function(resolve, reject) {
           if (data == null) {
 
             /* TODO: ridiculous hack, I don't know why updateFromCSV is being called twice - MC 9Dec2015 */
-            logger.warn("no shootings element found in CSV data; ignoring");
+            logger.warn("hit the hack path in updateFromCSV :( oh well just keep going :/");
             resolve(0);
           }
           return _this.connectToMongo().then(function() {
             return Shooting.find({
               year: +year
             }).remove();
-          }).then(function(conn) {
+          }).then(logger.info("removed all records for year:" + year)).then(function(conn) {
             var checked, d, e, entry, error, i, j, len, len1, n, ref, ref1, results, total;
             try {
               logger.debug('connected to mongo; pushing new values into db');
@@ -396,6 +415,11 @@
                  */
                 d = ref[i];
                 entry = new Shooting;
+                if (d.date == null) {
+                  logger.error("row #" + (i + 1) + " is missing a date entry. skipping");
+                  i++;
+                  continue;
+                }
                 entry.date = moment.tz(d.date, 'MM/DD/YYYY', "America/Los_Angeles").format();
                 entry.year = +entry.date.getFullYear();
                 entry.killed = d.killed;
@@ -436,7 +460,7 @@
                 entry.save();
                 ++checked;
                 if (checked === total) {
-                  logger.warn("'done writing data to Mongo: " + n + " records'");
+                  logger.info("done writing data to Mongo: " + checked + " records");
                   logger.info('deleting redis keys');
                   ref1 = ld.uniq(yearsInCSV);
                   for (j = 0, len1 = ref1.length; j < len1; j++) {
@@ -445,8 +469,8 @@
                   }
                   deleteRedisKey('totals');
                   deleteRedisKey('all');
-                  logger.warn('deleted redis keys');
-                  resolve(n);
+                  logger.info('deleted redis keys');
+                  resolve(checked);
                 }
                 results.push(i++);
               }
@@ -475,12 +499,12 @@
     };
 
     Data.prototype.csvToJSON = function(csvStr) {
-      var converter, logger, promise;
+      var converter, promise;
       converter = new Converter({});
       logger = this.logger;
-      promise = w.promise(function(resolve, reject) {
+      return promise = w.promise(function(resolve, reject) {
         return converter.fromString(csvStr, function(err, result) {
-          if (err) {
+          if (err != null) {
             reject(err);
           }
           logger.debug({
@@ -489,26 +513,302 @@
           return resolve(result);
         });
       });
+    };
+
+    Data.prototype.archiveUrls = function(urls, cb) {
+      var archiveTheUrl, c, checkDone, delay, delayInc, e, fn, j, len1, n, results, url;
+      throw "deprecated code! this should not be accessed";
+      if (urls == null) {
+        callErr(new Error("no urls present when archiving"));
+        return;
+      }
+      c = urls.length;
+      e = 0;
+      n = 0;
+      delayInc = 100;
+      delay = 50;
+      checkDone = function() {
+        if ((e + n) >= c) {
+          return cb({
+            err: null,
+            result: {
+              "new": n,
+              existing: e
+            }
+          });
+        }
+      };
+      archiveTheUrl = function(url) {
+        return archiver.check(url, function(err, result) {
+          var archiveUrl;
+          logger.debug("checked url: " + url);
+          if (err != null) {
+            cb({
+              err: err
+            }, null);
+            return;
+          }
+          if (!(result != null ? result.found : void 0)) {
+            logger.trace("saving url with archive.is");
+            return archiver.save(url, function(err, archiveUrl) {
+              if (err != null) {
+                cb({
+                  err: err
+                }, null);
+              }
+              logger.trace("capturing screenshot for url: " + url);
+              return webCapture.capture(url, function(err, path) {
+                var ref;
+                return cb({
+                  err: err
+                }, null)(err != null ? void 0 : (logger.trace('capture complete'), ref = new Reference({
+                  url: url,
+                  archiveUrl: archiveUrl,
+                  screenshotPath: path
+                }), ref.save(), ++n, checkDone()));
+              });
+            });
+          } else {
+            logger.debug("Archive has url, no archive needed.");
+            archiveUrl = result.url;
+            logger.trace("archive url: " + archiveUrl);
+            return Reference.find({
+              archiveUrl: archiveUrl
+            }, function(err, docs) {
+              var doc;
+              if (err != null) {
+                cb({
+                  err: err
+                }, null);
+                return;
+              }
+              if (docs.length > 1) {
+                cb({
+                  err: new Error("found multiple documents with an archiveUrl of " + archiveUrl)
+                });
+              }
+              doc = docs[0];
+              if ((doc != null ? doc.screenshotPath : void 0) == null) {
+                return webCapture.capture(url, function(err, path) {
+                  var ref;
+                  if (err != null) {
+                    cb({
+                      err: err
+                    }, null);
+                  } else {
+                    logger.trace("capture complete: " + path);
+                    ref = new Reference({
+                      url: url,
+                      archiveUrl: archiveUrl,
+                      screenshotPath: path
+                    });
+                    ref.save();
+                    ++e;
+                    return checkDone();
+                  }
+                });
+              } else {
+                ++e;
+                return checkDone();
+              }
+            });
+          }
+        });
+      };
+      fn = function(url) {
+        return setTimeout((function() {
+          return archiveTheUrl(url);
+        }), delay);
+      };
+      results = [];
+      for (j = 0, len1 = urls.length; j < len1; j++) {
+        url = urls[j];
+        fn(url);
+        results.push(delay += delayInc);
+      }
+      return results;
+    };
+
+    Data.prototype.processArchives = function(cb) {
+      var promise;
+      promise = w.promise((function(_this) {
+        return function(resolve, reject) {
+          var e, error;
+          logger.debug('finding unarchived documents');
+          try {
+            return Reference.find({
+              archiveUrl: {
+                $eq: null
+              }
+            }).limit(20).exec(function(err, docs) {
+              var c, checkExit, checkUrl, d, delay, delayInc, doc, e, j, len1, results;
+              c = docs.length;
+              if (c === 0) {
+                resolve("No update needed.");
+              }
+              if (err != null) {
+                reject(err);
+              }
+              d = 0;
+              e = 0;
+              delayInc = 200;
+              delay = 100;
+              logger.debug("checking archive for " + c + " entries");
+              checkExit = function() {
+                var message;
+                if (e >= c) {
+                  message = "All urls failed. See logs.";
+                  reject(message);
+                } else if (e > 0) {
+                  message = "Some urls encountered an error, check logs.";
+                } else if (d >= c) {
+                  message = "OK";
+                }
+                if (!!message) {
+                  return resolve(message);
+                }
+              };
+              checkUrl = function(url, doc) {
+                logger.debug("checking archive for url: " + url);
+                return archiver.check(url, function(err, result) {
+                  if (err != null) {
+                    ++e;
+                    logger.error({
+                      error: err
+                    });
+                    reject(err);
+                  }
+                  if (result.url != null) {
+                    logger.debug("archive url for " + url + ": " + result.url + "; saving");
+                    doc.archiveUrl = result.url;
+                    doc.save();
+                  } else {
+                    logger.error("result.url was empty");
+                    reject("archiver check failed");
+                  }
+                  if (doc.screenshotPath == null) {
+                    logger.debug("capture screenshot for url: " + url);
+                    return webCapture.capture(url, function(err, path) {
+                      if (err != null) {
+                        ++e;
+                        logger.error("capture failed for url: " + url);
+                        logger.error("document:");
+                        logger.error({
+                          document: doc.model
+                        });
+                        logger.error({
+                          error: err
+                        });
+                      } else {
+                        ++d;
+                        doc.screenshotPath = path;
+                        doc.save();
+                        return checkExit();
+                      }
+                    });
+                  } else {
+                    ++d;
+                    doc.save();
+                    return checkExit();
+                  }
+                });
+              };
+              results = [];
+              for (j = 0, len1 = docs.length; j < len1; j++) {
+                doc = docs[j];
+                results.push((function(url, doc) {
+                  setTimeout((function() {
+                    return checkUrl(url, doc);
+                  }), delay);
+                  return delay += delayInc;
+                })(doc.url, doc));
+              }
+              return results;
+            });
+          } catch (error) {
+            e = error;
+            logger.error({
+              error: e
+            });
+            return reject(e);
+          }
+        };
+      })(this));
       return promise;
     };
 
     Data.prototype.pullSheetData = function(year) {
       var promise;
+      logger = this.logger;
       this.timeout = 5000;
       return promise = w.promise((function(_this) {
         return function(resolve, reject) {
           var csvUrl;
           csvUrl = _this.csvUrls[year];
-          _this.logger.debug("pulling data from " + csvUrl);
-          return _this.getSheet(csvUrl).then(function(sheetStr) {
+          logger.debug("pulling data from " + csvUrl);
+          return _this.connectToMongo().then(function() {
+            return _this.getSheet(csvUrl);
+          }).then(function(sheetStr) {
             return _this.csvToJSON(sheetStr);
+          }).then(function(csvJSONresults) {
+            promise = w.promise(function(resolve, reject) {
+
+              /*
+                when new sources come in we store them but don't request that they be archived
+                this is so that we don't swamp archive.is
+                there will be a cron job that runs every 30 minutes and archives a few links at a time
+               */
+              var c, d, j, json, k, l, len1, len2, len3, ref1, results, source, url, urls;
+              urls = [];
+              for (j = 0, len1 = csvJSONresults.length; j < len1; j++) {
+                json = csvJSONresults[j];
+                ref1 = json.sources_semicolon_delimited.split(';');
+                for (k = 0, len2 = ref1.length; k < len2; k++) {
+                  source = ref1[k];
+                  urls.push(source);
+                }
+              }
+              logger.debug("checking References");
+              c = urls.length;
+              d = 0;
+              results = [];
+              for (l = 0, len3 = urls.length; l < len3; l++) {
+                url = urls[l];
+                results.push((function(url) {
+                  logger.trace("checking url: " + url);
+                  return Reference.find({
+                    url: url
+                  }).exec(function(err, docs) {
+                    ++d;
+                    if (err != null) {
+                      logger.error(err);
+                      reject(err);
+                    } else if ((docs != null ? docs.length : void 0) === 0) {
+                      logger.trace("creating new Reference");
+                      new Reference({
+                        url: url,
+                        archiveUrl: null,
+                        capturePath: null
+                      }).save();
+                    } else {
+                      logger.trace("reference exists, skipping");
+                    }
+                    if (d >= c) {
+                      return resolve(csvJSONresults);
+                    }
+                  });
+                })(url));
+              }
+              return results;
+            });
+            return promise;
           }).then(function(data) {
-            return {
+            return _this.updateFromCSV({
               data: data,
               year: year
-            };
-          }).then(_this.updateFromCSV).then(function(result) {
-            _this.logger.debug("data pull complete: " + result);
+            });
+          }).then(function(result) {
+            logger.debug("data pull complete: " + result);
             return resolve(result);
           })["catch"](function(err) {
             return reject(err);

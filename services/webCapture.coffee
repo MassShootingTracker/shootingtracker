@@ -14,36 +14,29 @@ ld = require 'lodash'
 
 class WebCapture
 
-  constructor: (saveDir) ->
+  constructor: (saveDir, @logger) ->
 
   capture: (url, cb) =>
+    @logger.trace "capturing url: #{url}"
     hostName = new urlLib.parse(url).hostname
+
+    unless url? and hostName?
+      msg = "image capture failed for url: #{url}"
+      @logger.error msg
+      cb(new Error(msg), null)
+      return
+
     fileName = sanitize(url).replace(".", "_")
-    pathWithHost = path.join(process.cwd(), capturesSavePath, sanitize(hostName))
+    pathWithHost = path.join(capturesSavePath, sanitize(hostName), "#{fileName}-#{new moment().format('DD-MMM-YYYY')}.png")
     @captureList = null
-    capturePath = path.join(pathWithHost, "#{fileName}-#{new moment().format('DD-MMM-YYYY')}.png")
+    capturePath = path.join(process.cwd(), pathWithHost)
     options =  shotSize: { width: captureWidth , height: captureHeight, quality: captureQuality }
 
-    ###
-      url: {type: String, index: true},
-      archiveUrl: String,
-      screenshot: String
-    }
-    ###
-    # does a capture need to be done?
-    Reference.find(url: url).exec( (err, docs) ->
-      if err?
-        cb(err, null)
-
-      else
-        if docs.length > 0
-          cb(true)
-        else
-          webshotLib(url, capturePath, options, (err) ->
-            if err? cb(err, null)
-            else cb(null, capturePath)
-          )
+    webshotLib(url, capturePath, options, (err) ->
+      if err? cb(err, null)
+      else cb(null, pathWithHost)
     )
+
 
 
 

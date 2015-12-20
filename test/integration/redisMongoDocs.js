@@ -1,5 +1,5 @@
 (function() {
-  var chai, expect, ld, path, should, sinon;
+  var Data, chai, expect, ld, path, should, sinon;
 
   require('source-map-support').install();
 
@@ -14,6 +14,8 @@
   sinon = require('sinon');
 
   path = require('path');
+
+  Data = require('../../services/data.js').Data;
 
   describe('GoogleDocs / Redis / Mongo Integration', function() {
     var config, errorHandler, getDataLayer;
@@ -35,12 +37,12 @@
     };
     getDataLayer = function() {
       var logger;
-      config = require(path.join(process.cwd(), './config'));
+      config = require('../../config');
       logger = new (require('bunyan'))({
         name: 'errors',
         level: 50
       });
-      return new (require(path.join(process.cwd(), './services/data.js'))).Data(config, logger);
+      return new Data(config, logger);
     };
     it('should get the redis client', function(done) {
       var dl;
@@ -108,7 +110,7 @@
     return it('should throw when no config', function() {
       var f;
       f = function() {
-        return new (require(path.join(process.cwd(), './services/data.js'))).Data();
+        return new Data();
       };
       return f.should["throw"](/config is required/);
     });

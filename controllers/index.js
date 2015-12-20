@@ -29,6 +29,28 @@ Index.prototype.register = function () {
   this.app.get('/data', this.datapage);
   this.app.get('/data/:year', this.datapage);
 
+  this.app.post('/archive', function (req, res, next) {
+
+    logger.debug('attempting to archive unarchived urls');
+
+    if (req.body.key !== config.app.apiKey) {
+      logger.error("posted key incorrect: got:" + req.body.key + " expected:" + config.app.apiKey);
+      return res.status(403).send('Invalid Key');
+    }
+    logger.debug("api key correct, starting update");
+
+    dataLayer.connectToMongo().then(dataLayer.processArchives)
+      .then(function (message) {
+        logger.debug('done with archiving, result: ' + message);
+        res.status(200).send(message);
+      })
+      .catch(function (message) {
+        logger.error('archiving failed: ' + message);
+        res.status(500).send(message);
+        next()
+      });
+  });
+
   this.app.post('/update', function (req, res, next) {
 
     logger.debug('attempting update');
@@ -52,19 +74,19 @@ Index.prototype.register = function () {
   });
 
   (new Api(this.app)).register();
-}
+};
 
 Index.prototype.home = function home(req, res, next) {
 
   var year = String(new Date().getFullYear());
 
   res.locals.data = {
-    mostRecent: [],
-    currentYear: year,
-    totalCurrentYear: '',
-    totalAllYears: '',
-    daysSince: '',
-    daysLabel: 'days'
+    mostRecent:[],
+    currentYear:year,
+    totalCurrentYear:'',
+    totalAllYears:'',
+    daysSince:'',
+    daysLabel:'days'
   };
 
   dataLayer.getTotals()
@@ -74,23 +96,23 @@ Index.prototype.home = function home(req, res, next) {
         return;
       }
 
-      totals.mostRecent = _.map(totals.mostRecent, function(shooting) {
+      totals.mostRecent = _.map(totals.mostRecent, function (shooting) {
         shooting.displayDate = new moment(shooting.date).format('MM/DD/YYYY');
         return shooting;
       });
 
       res.locals.data = {
-        mostRecent: totals.mostRecent,
-        currentYear: year,
-        totalCurrentYear: totals['2015'],
-        totalAllYears: totals.totalAllYears,
-        daysSince: totals.daysSince,
-        daysLabel: totals.daysSince === 1 ? 'day' : 'days'
+        mostRecent:totals.mostRecent,
+        currentYear:year,
+        totalCurrentYear:totals['2015'],
+        totalAllYears:totals.totalAllYears,
+        daysSince:totals.daysSince,
+        daysLabel:totals.daysSince === 1 ? 'day' : 'days'
       };
 
-    config.logger.debug({data: res.locals.data});
+      config.logger.debug({data:res.locals.data});
     })
-    .then(function(){
+    .then(function () {
       res.render('index');
     })
     .catch(next);
@@ -107,23 +129,23 @@ Index.prototype.datapage = function datapage(req, res, next) {
 
   config.logger.debug('building datapage with param: ' + year);
   dataLayer.getByYear(year).then(function (shootings) {
-    app.locals.data = shootings;
-    //console.dir(data[0])
+      app.locals.data = shootings;
+      //console.dir(data[0])
 
-    var _i, _len, shooting;
-    for (_i = 0, _len = shootings.length; _i < _len; _i++) {
-      shooting = shootings[_i];
-      shooting.displayDate = new moment(shooting.date).format("MM/DD/YYYY");
-      shooting.number = shootings.length - _i;
-    }
+      var _i, _len, shooting;
+      for (_i = 0, _len = shootings.length; _i < _len; _i++) {
+        shooting = shootings[_i];
+        shooting.displayDate = new moment(shooting.date).format("MM/DD/YYYY");
+        shooting.number = shootings.length - _i;
+      }
 
-    res.render('data', {
-      dataJson: JSON.stringify(shootings),
-      year: year,
-      is2015: year === "2015",
-      is2014: year === "2014",
-      is2013: year === "2013"
-    });
-  })
-  .catch(next);
+      res.render('data', {
+        dataJson:JSON.stringify(shootings),
+        year:year,
+        is2015:year === "2015",
+        is2014:year === "2014",
+        is2013:year === "2013"
+      });
+    })
+    .catch(next);
 }

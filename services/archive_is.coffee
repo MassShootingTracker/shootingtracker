@@ -8,23 +8,29 @@ getUrl = "https://archive.is/"
 
 class ArchiveIS
 
-  constructor: () ->
+  constructor: (@logger) ->
 
   save: (url, cb) =>
-    console.log "ArchiveIS tool requesting save for #{url}"
-    request.post submitUrl, { form: url: url, anyway: 1 }, (error, response, body) ->
-      if !error or response.statusCode != 200
+    @logger.trace "ArchiveIS tool requesting save for #{url}"
+    request.post( submitUrl, { form: url: url, anyway: 1 }, (error, response, body) =>
+      if error or !response or (response.statusCode >= 400)
+        @logger.warn "save for url #{url} failed! Status code: #{response.statusCode}"
         cb?(error, null)
       else
+        @logger.trace "save for url #{url} complete"
         cb?(null, {body: body, response: response})
+    )
 
   check: (url, cb) =>
-    console.log "ArchiveIS tool checking #{url} -- #{getUrl}/#{url}"
+    archUrl = "#{getUrl}/#{url}"
+    @logger.trace "ArchiveIS tool checking #{url} -- #{archUrl}"
     # request.post getUrl, { form: search: url},
-    request.get "#{getUrl}/#{url}", {}, (error, response, body) ->
+    request.get( archUrl, {}, (error, response, body) ->
       if !error
-        cb?(null, {found: (body.indexOf('No results') == -1)})
+        cb?(null, {found: (body.indexOf('No results') == -1), url: archUrl})
       else
         cb?(error, null)
+    )
+
 
 module.exports = ArchiveIS

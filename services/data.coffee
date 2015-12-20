@@ -3,22 +3,29 @@ node = require('when/node')
 callbacks = require('when/callbacks')
 mongoose = require('mongoose')
 Shooting = require('.././data/schema/shooting')
+Reference = require('.././data/schema/reference')
+
 redis = require 'redis'
 moment = require('moment-timezone')
+parallel = require('when/parallel');
 
 redisTTL = 1 * 60 * 60
 nodefn = require('when/node')
 request = require('request')
 Converter = require('csvtojson').Converter
 ld = require 'lodash'
-webCapture = new (require './webCapture')()
-archiver = new (require './archive_is')()
+webCapture = null
+archiver = null
+logger = null
 
 class Data
 
   constructor: (config, @logger) ->
     unless config?
       throw 'config is required!'
+
+    webCapture = new (require './webCapture')(null, @logger)
+    archiver = new (require './archive_is')(@logger)
 
     @config = config
     @csvUrls = config.googleDocs
@@ -36,7 +43,7 @@ class Data
 
     unless @logger?
       @logger = (require 'bunyan')({name: 'mst-data', level: (config.logging?.level? or 10)})
-
+    logger = @logger
 
     process.on 'unhandledRejection', (reason, p) =>
       @logger.error 'Possibly Unhandled Rejection at: Promise ', p, ' reason: ', reason
@@ -261,91 +268,99 @@ class Data
     logger.trace "starting update from csv"
     yearsInCSV = []
     {data, year} = input
+    logger.debug "data sample"
+    logger.debug dataSample: data[0] if data?[0]?
     deleteRedisKey = @deleteRedisKey
 
     promise = w.promise (resolve, reject) =>
       unless data?
         ### TODO: ridiculous hack, I don't know why updateFromCSV is being called twice - MC 9Dec2015 ###
-        logger.warn "no shootings element found in CSV data; ignoring"
+        logger.warn "hit the hack path in updateFromCSV :( oh well just keep going :/"
         resolve(0)
 
       @connectToMongo()
-        .then(() => Shooting.find(year: +year).remove())
-        .then((conn) ->
-          try
-            logger.debug 'connected to mongo; pushing new values into db'
-            ref = data
-            total = data.length
-            checked = 0
-            n = 0
-            i = 0
-            len = ref.length
+      .then(() => Shooting.find(year: +year).remove())
+      .then( logger.info("removed all records for year:#{year}") )
+      .then((conn) ->
+        try
+          logger.debug 'connected to mongo; pushing new values into db'
+          ref = data
+          total = data.length
+          checked = 0
+          n = 0
+          i = 0
+          len = ref.length
 
-            while i < len
+          while i < len
 
-              ###
-              sample:
-              { date: '9/20/2015',
-               name: 'Unknown',
-               killed: 0,
-               wounded: 6,
-               city: 'Tulsa',
-               state: 'OK',
-               synopsis: '',
-               guns_info: '',
-               other_info: '',
-               sources_semicolon_delimited: 'http://www.newson6.com/story/30072412/six-shot-outside-tulsa-nightclub' },
+            ###
+            sample:
+            { date: '9/20/2015',
+             name: 'Unknown',
+             killed: 0,
+             wounded: 6,
+             city: 'Tulsa',
+             state: 'OK',
+             synopsis: '',
+             guns_info: '',
+             other_info: '',
+             sources_semicolon_delimited: 'http://www.newson6.com/story/30072412/six-shot-outside-tulsa-nightclub' },
 
-              ###
-              d = ref[i]
-              entry = new Shooting
+            ###
+            d = ref[i]
+            entry = new Shooting
 
-              # we're just assuming east coast time here; actual times aren't important, just dates
-              # this is so entries on 12/31 don't fall in to the next year
-              entry.date = moment.tz(d.date, 'MM/DD/YYYY', "America/Los_Angeles").format()
-              entry.year = +entry.date.getFullYear()
-              entry.killed = d.killed
-              entry.city = d.city
-              entry.wounded = d.wounded
-              entry.city = d.city
-              entry.state = d.state
-
-              if d.sources_semicolon_delimited.indexOf(';') > -1
-                # filter out empty sources
-                entry.sources = ld.filter(d.sources_semicolon_delimited.split(';'), (x) -> !!x.length)
-              else
-                entry.sources = d.sources_semicolon_delimited
-
-              if d.name_semicolon_delimited.indexOf(';') > -1
-                d.name_semicolon_delimited.split(';').forEach((p) -> entry.perpetrators.push({name: p}))
-              else
-                entry.perpetrators = [{name: d.name_semicolon_delimited}]
-
-              logger.trace "entry": entry
-              yearsInCSV.push(entry.date.getFullYear())
-              ###
-               find any entries on this data with the same city and state and at least one matching source
-               if found, delete and re-create
-               else just save each one
-              ###
-
-              entry.save()
-              ++checked
-              if checked == total
-                logger.warn "'done writing data to Mongo: #{n} records'"
-                logger.info 'deleting redis keys'
-                for year in ld.uniq(yearsInCSV)
-                  deleteRedisKey('' + year)
-                deleteRedisKey('totals')
-                deleteRedisKey('all')
-                logger.warn 'deleted redis keys'
-                resolve(n)
-
+            # we're just assuming east coast time here; actual times aren't important, just dates
+            # this is so entries on 12/31 don't fall in to the next year
+            unless d.date?
+              logger.error("row ##{i + 1} is missing a date entry. skipping")
               i++
+              continue
 
-          catch e
-            reject(e)
-        ).catch((err) -> reject(err))
+            entry.date = moment.tz(d.date, 'MM/DD/YYYY', "America/Los_Angeles").format()
+            entry.year = +entry.date.getFullYear()
+            entry.killed = d.killed
+            entry.city = d.city
+            entry.wounded = d.wounded
+            entry.city = d.city
+            entry.state = d.state
+
+            if d.sources_semicolon_delimited.indexOf(';') > -1
+              # filter out empty sources
+              entry.sources = ld.filter(d.sources_semicolon_delimited.split(';'), (x) -> !!x.length)
+            else
+              entry.sources = d.sources_semicolon_delimited
+
+            if d.name_semicolon_delimited.indexOf(';') > -1
+              d.name_semicolon_delimited.split(';').forEach((p) -> entry.perpetrators.push({name: p}))
+            else
+              entry.perpetrators = [{name: d.name_semicolon_delimited}]
+
+            logger.trace "entry": entry
+            yearsInCSV.push(entry.date.getFullYear())
+            ###
+             find any entries on this data with the same city and state and at least one matching source
+             if found, delete and re-create
+             else just save each one
+            ###
+
+            entry.save()
+            ++checked
+            if checked == total
+              logger.info "done writing data to Mongo: #{checked} records"
+              logger.info 'deleting redis keys'
+              for year in ld.uniq(yearsInCSV)
+                deleteRedisKey('' + year)
+              deleteRedisKey('totals')
+              deleteRedisKey('all')
+              logger.info( 'deleted redis keys')
+              resolve(checked)
+
+            i++
+
+        catch e
+          reject(e)
+      ).catch((err) -> reject(err))
 
     return promise
 
@@ -360,62 +375,219 @@ class Data
     logger = @logger
     promise = w.promise (resolve, reject) ->
       converter.fromString csvStr, (err, result) ->
-        if err
-          reject err
+        reject(err) if err?
         logger.debug "csv records count": result.length
-    promise
-    resolve result
+        resolve(result)
 
-  archiveUrl: (url) =>
+  archiveUrls: (urls, cb) =>
+    throw "deprecated code! this should not be accessed"
+    unless urls?
+      callErr(new Error("no urls present when archiving"))
+      return
 
-    promise = w.promise (resolve, reject) =>
-      # check archive.is for this url
+    c = urls.length
+    e = 0
+    n = 0
+    delayInc = 100
+    delay = 50
+
+    checkDone = ->
+      if (e + n) >= c
+        cb(err: null, result: {new: n, existing: e})
+
+    archiveTheUrl = (url) ->
       archiver.check url, (err, result) ->
         logger.debug "checked url: #{url}"
-        if hadError(err) then reject(err)
-        if not result.found
+        if err?
+          cb(err: err, null)
+          return
+
+        if not result?.found
           # save AIS for this url
           logger.trace "saving url with archive.is"
 
           archiver.save(url, (err, archiveUrl) ->
-            if hadError(err) then reject(err)
+            cb(err: err, null) if err?
             # capture shot of this url
-            logger.trace "capturing screenshot for url"
+
+            logger.trace "capturing screenshot for url: #{url}"
             webCapture.capture(url, (err, path) ->
-              reject(err) if err?
+              cb(err: err, null) if err?
               else
                 logger.trace('capture complete')
                 ref = new Reference(url: url, archiveUrl: archiveUrl, screenshotPath: path)
-                resolve(true)
+                ref.save()
+                ++n
+                # return result: new: #, old: #
+                checkDone()
             )
           )
         else
-          logger.debug "Archive has url, no capture needed."
-          resolve(true)
+          logger.debug "Archive has url, no archive needed."
+          archiveUrl = result.url
+          logger.trace "archive url: #{archiveUrl}"
+          Reference.find(archiveUrl: archiveUrl, (err, docs) ->
+            if err?
+              cb(err: err, null)
+              return
+            if docs.length > 1
+              cb(err: new Error("found multiple documents with an archiveUrl of #{archiveUrl}"))
+            doc = docs[0]
+            unless doc?.screenshotPath?
+              webCapture.capture(url, (err, path) ->
+                if err?
+                  cb(err: err, null)
+                  return
+                else
+                  logger.trace("capture complete: #{path}")
+                  ref = new Reference(url: url, archiveUrl: archiveUrl, screenshotPath: path)
+                  ref.save()
+                  ++e
+                  checkDone()
+              )
+            else
+              ++e
+              checkDone()
+          )
+
+    for url in urls
+      do (url) ->
+        setTimeout((-> archiveTheUrl(url)), delay)
+      delay += delayInc
+
+  processArchives: (cb) =>
+    promise = w.promise (resolve, reject) =>
+      # we are doing 20 of these at a time with a delay to avoid getting cut off by archive.is
+      logger.debug 'finding unarchived documents'
+      try
+        Reference.find(
+          archiveUrl: {$eq: null}
+        )
+        .limit(20)
+        .exec (err, docs) ->
+          c = docs.length
+          if c == 0
+            resolve("No update needed.")
+          if err?
+            reject(err)
+
+          d = 0
+          e = 0
+          delayInc = 200
+          delay = 100
+          logger.debug "checking archive for #{c} entries"
+
+          checkExit = ->
+            if e >= c
+              message = "All urls failed. See logs."
+              reject(message)
+            else if e > 0
+              message = "Some urls encountered an error, check logs."
+            else if d >= c
+              message = "OK"
+            if !!message
+              resolve(message)
+
+
+          checkUrl = (url, doc) ->
+            # check the url with archive.is site
+            logger.debug "checking archive for url: #{url}"
+            archiver.check(url, (err, result) ->
+              if err?
+                ++e
+                logger.error(error: err)
+                reject(err)
+              if result.url?
+                logger.debug "archive url for #{url}: #{result.url}; saving"
+                doc.archiveUrl = result.url
+                doc.save()
+              else
+                logger.error("result.url was empty")
+                reject("archiver check failed")
+              # take a screenshot
+              unless doc.screenshotPath?
+                logger.debug "capture screenshot for url: #{url}"
+                webCapture.capture(url, (err, path) ->
+                  if err?
+                    ++e
+                    logger.error("capture failed for url: #{url}")
+                    logger.error("document:")
+                    logger.error(document: doc.model)
+                    logger.error(error: err)
+                    return
+                  else
+                    ++d
+                    doc.screenshotPath = path
+                    doc.save()
+                    checkExit()
+                )
+              else
+                ++d
+                doc.save()
+                checkExit()
+            )
+
+          for doc in docs
+            do (url = doc.url, doc = doc) ->
+              setTimeout( (-> checkUrl(url, doc) ), delay)
+              delay += delayInc
+      catch e
+        logger.error(error: e)
+        reject(e)
 
     return promise
 
   pullSheetData: (year) =>
+    logger = @logger
     this.timeout = 5000
     promise = w.promise (resolve, reject) =>
       csvUrl = @csvUrls[year]
-      @logger.debug "pulling data from " + csvUrl
-      @getSheet(csvUrl
-      ).then((sheetStr) =>
-        @csvToJSON( sheetStr )
-      ).then(
-        (data) ->  {data: data, year: year }
-      ).then(
-        @updateFromCSV
-      ).then( (result) =>
-        # TODO parallel
-        archiveUrl(result)
-      ).then(
-        (result) =>
-          @logger.debug "data pull complete: #{result}"
-          resolve(result)
-      ).catch((err)->
-        reject(err)
-      )
+      logger.debug "pulling data from " + csvUrl
+      @connectToMongo().then(
+        => @getSheet(csvUrl))
+      .then((sheetStr) => @csvToJSON(sheetStr))
+      .then((csvJSONresults) =>
+        promise = w.promise (resolve, reject) =>
+          ###
+            when new sources come in we store them but don't request that they be archived
+            this is so that we don't swamp archive.is
+            there will be a cron job that runs every 30 minutes and archives a few links at a time
+          ###
+          urls = []
+          for json in csvJSONresults
+            for source in json.sources_semicolon_delimited.split(';')
+              urls.push(source)
+
+          logger.debug "checking References"
+
+          c = urls.length
+          d = 0
+
+          for url in urls
+            do (url) =>
+              logger.trace "checking url: #{url}"
+              Reference.find(
+                url: url
+              ).exec((err, docs) ->
+                ++d
+                if err?
+                  logger.error err
+                  reject(err)
+                else if docs?.length == 0
+                  logger.trace "creating new Reference"
+                  new Reference(url: url, archiveUrl: null, capturePath: null).save()
+                else
+                  logger.trace "reference exists, skipping"
+
+                if d >= c
+                  resolve(csvJSONresults)
+              )
+        return promise)
+      .then((data) =>
+        @updateFromCSV({data: data, year: year}))
+      .then((result) =>
+        logger.debug "data pull complete: #{result}"
+        resolve(result))
+      .catch((err)-> reject(err))
 
 module.exports.Data = Data
