@@ -41,7 +41,7 @@ Index.prototype.register = function () {
 
     dataLayer.connectToMongo().then(dataLayer.processArchives)
       .then(function (message) {
-        logger.debug('done with archiving, result: ' + message);
+        logger.info('done with archiving, result: ' + message);
         res.status(200).send(message);
       })
       .catch(function (message) {

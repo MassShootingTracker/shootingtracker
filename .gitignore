@@ -14,3 +14,4 @@ data/schema/shooting.js
 /services/webCapture.js
 /services/archive_is.js
 /test/integration/redisMongoDocs.js
+/captures
