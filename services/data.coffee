@@ -379,82 +379,6 @@ class Data
         logger.debug "csv records count": result.length
         resolve(result)
 
-  archiveUrls: (urls, cb) =>
-    throw "deprecated code! this should not be accessed"
-    unless urls?
-      callErr(new Error("no urls present when archiving"))
-      return
-
-    c = urls.length
-    e = 0
-    n = 0
-    delayInc = 100
-    delay = 50
-
-    checkDone = ->
-      if (e + n) >= c
-        cb(err: null, result: {new: n, existing: e})
-
-    archiveTheUrl = (url) ->
-      archiver.check url, (err, result) ->
-        logger.debug "checked url: #{url}"
-        if err?
-          cb(err: err, null)
-          return
-
-        if not result?.found
-          # save AIS for this url
-          logger.trace "saving url with archive.is"
-
-          archiver.save(url, (err, archiveUrl) ->
-            cb(err: err, null) if err?
-            # capture shot of this url
-
-            logger.trace "capturing screenshot for url: #{url}"
-            webCapture.capture(url, (err, path) ->
-              cb(err: err, null) if err?
-              else
-                logger.trace('capture complete')
-                ref = new Reference(url: url, archiveUrl: archiveUrl, screenshotPath: path)
-                ref.save()
-                ++n
-                # return result: new: #, old: #
-                checkDone()
-            )
-          )
-        else
-          logger.debug "Archive has url, no archive needed."
-          archiveUrl = result.url
-          logger.trace "archive url: #{archiveUrl}"
-          Reference.find(archiveUrl: archiveUrl, (err, docs) ->
-            if err?
-              cb(err: err, null)
-              return
-            if docs.length > 1
-              cb(err: new Error("found multiple documents with an archiveUrl of #{archiveUrl}"))
-            doc = docs[0]
-            unless doc?.screenshotPath?
-              webCapture.capture(url, (err, path) ->
-                if err?
-                  cb(err: err, null)
-                  return
-                else
-                  logger.trace("capture complete: #{path}")
-                  ref = new Reference(url: url, archiveUrl: archiveUrl, screenshotPath: path)
-                  ref.save()
-                  ++e
-                  checkDone()
-              )
-            else
-              ++e
-              checkDone()
-          )
-
-    for url in urls
-      do (url) ->
-        setTimeout((-> archiveTheUrl(url)), delay)
-      delay += delayInc
-
   processArchives: (cb) =>
     promise = w.promise (resolve, reject) =>
       # we are doing 20 of these at a time with a delay to avoid getting cut off by archive.is
@@ -487,7 +411,6 @@ class Data
               message = "OK"
             if !!message
               resolve(message)
-
 
           checkUrl = (url, doc) ->
             # check the url with archive.is site
