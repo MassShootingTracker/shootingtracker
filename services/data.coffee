@@ -273,10 +273,10 @@ class Data
     deleteRedisKey = @deleteRedisKey
 
     promise = w.promise (resolve, reject) =>
-      unless data?
+      unless data? and year?
         ### TODO: ridiculous hack, I don't know why updateFromCSV is being called twice - MC 9Dec2015 ###
-        logger.warn "hit the hack path in updateFromCSV :( oh well just keep going :/"
-        resolve(0)
+        logger.trace "hit the hack path in updateFromCSV :( oh well just keep going :/"
+        return resolve(0)
 
       @connectToMongo()
       .then(() => Shooting.find(year: +year).remove())
@@ -542,7 +542,7 @@ class Data
     this.timeout = 5000
     promise = w.promise (resolve, reject) =>
       csvUrl = @csvUrls[year]
-      logger.debug "pulling data from " + csvUrl
+      logger.debug "pulling data for year: #{year} from  " + csvUrl
       @connectToMongo().then(
         => @getSheet(csvUrl))
       .then((sheetStr) => @csvToJSON(sheetStr))

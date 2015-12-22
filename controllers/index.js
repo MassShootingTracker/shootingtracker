@@ -31,7 +31,7 @@ Index.prototype.register = function () {
 
   this.app.post('/archive', function (req, res, next) {
 
-    logger.debug('attempting to archive unarchived urls');
+    logger.info('attempting to archive unarchived urls');
 
     if (req.body.key !== config.app.apiKey) {
       logger.error("posted key incorrect: got:" + req.body.key + " expected:" + config.app.apiKey);
