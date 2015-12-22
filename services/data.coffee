@@ -270,6 +270,9 @@ class Data
     {data, year} = input
     logger.debug "data sample"
     logger.debug dataSample: data[0] if data?[0]?
+    if (not data) or data.length == 0
+      logger.warn "data input is 0, returning"
+      return 0
     deleteRedisKey = @deleteRedisKey
 
     promise = w.promise (resolve, reject) =>
@@ -290,6 +293,10 @@ class Data
           n = 0
           i = 0
           len = ref.length
+
+          if len == 0
+            logger.warn "no values found, returning"
+            resolve(0)
 
           while i < len
 
@@ -465,6 +472,9 @@ class Data
     this.timeout = 5000
     promise = w.promise (resolve, reject) =>
       csvUrl = @csvUrls[year]
+      unless csvUrl?
+        logger.error "couldn't find CSV url for year: #{year}"
+        reject("Failed. See logs.")
       logger.debug "pulling data for year: #{year} from  " + csvUrl
       @connectToMongo().then(
         => @getSheet(csvUrl))
@@ -481,10 +491,15 @@ class Data
             for source in json.sources_semicolon_delimited.split(';')
               urls.push(source)
 
-          logger.debug "checking References"
+          logger.debug "adding Reference records"
 
           c = urls.length
           d = 0
+
+          if c == 0
+            logger.warn "no records found, skipping"
+            resolve(csvJSONresults)
+            return
 
           for url in urls
             do (url) =>

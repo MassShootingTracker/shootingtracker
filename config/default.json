@@ -6,7 +6,8 @@
   "googleDocs": {
     "2013":"https://docs.google.com/spreadsheets/d/1ZCjcC9MUnLKxT65GLoyJE9gQ-auEX1SxKGMvt7FNtSs/pub?output=csv",
     "2014": "https://docs.google.com/spreadsheets/d/13E93RQsGo3XiBxITb9FSXEKSwXRdhQJ7fi3hm2FqGk8/pub?output=csv",
-    "2015": "https://docs.google.com/spreadsheets/d/11KB81s3udI0evoIr-19MXb3aoqZvxiZIxyg0GXz_2rc/pub?output=csv"
+    "2015": "https://docs.google.com/spreadsheets/d/11KB81s3udI0evoIr-19MXb3aoqZvxiZIxyg0GXz_2rc/pub?output=csv",
+    "2016": "https://docs.google.com/spreadsheets/d/1JbPA0RItVsqBFG72tVRrYv9ezC_8Qb2VLh6eJ7cxqXQ/pub?gid=0&single=true&output=csv"
   },
   "mongo": {
     "url": "mongodb://localhost:27017/mst"
