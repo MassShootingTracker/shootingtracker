@@ -101,10 +101,12 @@ Index.prototype.home = function home(req, res, next) {
         return shooting;
       });
 
+      var currentYear = new Date().getFullYear()+'';
+
       res.locals.data = {
         mostRecent:totals.mostRecent,
         currentYear:year,
-        totalCurrentYear:totals['2015'],
+        totalCurrentYear:totals[currentYear],
         totalAllYears:totals.totalAllYears,
         daysSince:totals.daysSince,
         daysLabel:totals.daysSince === 1 ? 'day' : 'days'
