@@ -7,7 +7,8 @@ var moment = require('moment');
 var config = require('../config');
 var Data = require('../services/data.js').Data;
 var dataLayer = null;
-var app = null
+var app = null;
+var currentYear = new Date().getFullYear()+'';
 
 function Index(appArg) {
   this.app = appArg;
@@ -101,8 +102,6 @@ Index.prototype.home = function home(req, res, next) {
         return shooting;
       });
 
-      var currentYear = new Date().getFullYear()+'';
-
       res.locals.data = {
         mostRecent:totals.mostRecent,
         currentYear:year,
@@ -144,6 +143,8 @@ Index.prototype.datapage = function datapage(req, res, next) {
       res.render('data', {
         dataJson:JSON.stringify(shootings),
         year:year,
+        currentYear: currentYear,
+        is2016: year === "2016",
         is2015:year === "2015",
         is2014:year === "2014",
         is2013:year === "2013"
