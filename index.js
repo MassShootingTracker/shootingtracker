@@ -18,7 +18,8 @@ app.engine('.hbs', exphbs({
   extname:'.hbs',
   layoutsDir:'views/layouts/',
   partialsDir:'views/partials/',
-  defaultLayout:'main'
+  defaultLayout:'main',
+  helpers: { uppercase: function(str){ return str.toUpperCase(); } }
 }));
 
 app.set('view engine', '.hbs');
