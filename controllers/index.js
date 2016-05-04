@@ -131,6 +131,13 @@ Index.prototype.datapage = function datapage(req, res, next) {
   config.logger.debug('building datapage with param: ' + year);
   dataLayer.getByYear(year).then(function (shootings) {
       app.locals.data = shootings;
+
+      app.locals.downloads = Object.keys(config.googleDocs).map(function(key) {
+        return {
+          year: String(key),
+          link: config.googleDocs[key]
+        };
+      });
       //console.dir(data[0])
 
       var _i, _len, shooting;
