@@ -39,12 +39,17 @@ if (process.env.REDISCLOUD_PASSWORD) {
 if (process.env.REDISCLOUD_PORT) {
   conf.redis.port = process.env.REDISCLOUD_PORT;
 }
+if (process.env.LOG_LEVEL) {
+  conf.logLevel = process.env.LOG_LEVEL;
+} else {
+  conf.logLevel = "warn"
+}
 
 conf.logger = (require('bunyan')).createLogger({
   name: "mst",
   streams: [
     {
-      level: "debug",
+      level: conf.logLevel,
       stream: process.stdout
     }, {
       level: "error",
