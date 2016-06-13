@@ -1,3 +1,5 @@
+# mocha --compilers coffee:coffee-script/register ./test/integration/redisMongoDocs.coffee --timeout=45000 --ui bdd --debug-brk
+
 w = require('when')
 node = require('when/node')
 callbacks = require('when/callbacks')
