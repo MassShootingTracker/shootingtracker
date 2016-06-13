@@ -1,5 +1,5 @@
 (function() {
-  var Data, chai, expect, ld, path, should, sinon;
+  var Data, chai, expect, ld, level, path, should, sinon;
 
   require('source-map-support').install();
 
@@ -17,7 +17,11 @@
 
   Data = require('../../services/data.js').Data;
 
-  describe('GoogleDocs / Redis / Mongo Integration', function() {
+  level = process.argv[2];
+
+  console.log("level: " + level);
+
+  describe('GoogleDocs / Redis / Mongo', function() {
     var config, errorHandler, getDataLayer;
     before(function(done) {
       return done();
@@ -82,7 +86,7 @@
         return done();
       });
     });
-    it('should get totals for all years', function(done) {
+    it('post install - should get totals for all years', function(done) {
       var dl;
       dl = getDataLayer();
       dl.should.be;
@@ -94,7 +98,7 @@
         return done();
       });
     });
-    it('should get data for 2015', function(done) {
+    it('post install - should get data for 2015', function(done) {
       var dl;
       dl = getDataLayer();
       dl.should.be;
