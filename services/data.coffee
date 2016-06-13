@@ -27,7 +27,7 @@ class Data
       throw 'config is required!'
 
     webCapture = new (require './webCapture')(null, @logger)
-    archiver = new (require './archive_is')(@logger)
+    archiver = new (require('./archive_is'))(@logger)
 
     @config = config
     @csvUrls = config.googleDocs

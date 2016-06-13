@@ -36,8 +36,6 @@
 
   logger = null;
 
-  debugger;
-
   Data = (function() {
     function Data(config, logger1) {
       var ref1, userpass;
