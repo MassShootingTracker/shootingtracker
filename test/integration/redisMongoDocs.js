@@ -1,5 +1,5 @@
 (function() {
-  var Data, chai, expect, ld, level, path, should, sinon;
+  var Data, chai, expect, ld, path, should, sinon;
 
   require('source-map-support').install();
 
@@ -16,10 +16,6 @@
   path = require('path');
 
   Data = require('../../services/data.js').Data;
-
-  level = process.argv[2];
-
-  console.log("level: " + level);
 
   describe('GoogleDocs / Redis / Mongo', function() {
     var config, errorHandler, getDataLayer;

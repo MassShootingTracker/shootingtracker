@@ -14,6 +14,8 @@
     "postinstall": "gulp build ",
     "prestart": "npm test && gulp build",
     "test": "mocha test/integration/redisMongoDocs.js --grep \"post install\" --invert",
+    "debug":"LOG_LEVEL=trace node index.js --debug",
+    "debug-brk":"LOG_LEVEL=trace node index.js --debug-brk",
     "start": "node index.js"
   },
   "license": "MIT",

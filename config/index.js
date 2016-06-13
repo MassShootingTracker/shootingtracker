@@ -12,7 +12,7 @@ def = require('./default.json');
 conf = ld.merge(conf, def);
 
 if (process.env.pm_id) {
-  console.log({"process.env.pm_id":process.env.pm_id});
+  console.log("process.env.pm_id : " + process.env.pm_id);
 }
 
 if (process.env.OPENSHIFT_NODEJS_IP) {
