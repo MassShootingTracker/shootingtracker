@@ -17,7 +17,7 @@
 
   Data = require('../../services/data.js').Data;
 
-  describe('GoogleDocs / Redis / Mongo Integration', function() {
+  describe('GoogleDocs / Redis / Mongo', function() {
     var config, errorHandler, getDataLayer;
     before(function(done) {
       return done();
@@ -82,7 +82,7 @@
         return done();
       });
     });
-    it('should get totals for all years', function(done) {
+    it('post install - should get totals for all years', function(done) {
       var dl;
       dl = getDataLayer();
       dl.should.be;
@@ -94,7 +94,7 @@
         return done();
       });
     });
-    it('should get data for 2015', function(done) {
+    it('post install - should get data for 2015', function(done) {
       var dl;
       dl = getDataLayer();
       dl.should.be;
