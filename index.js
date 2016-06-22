@@ -18,7 +18,8 @@ app.engine('.hbs', exphbs({
   extname:'.hbs',
   layoutsDir:'views/layouts/',
   partialsDir:'views/partials/',
-  defaultLayout:'main'
+  defaultLayout:'main',
+  helpers: { uppercase: function(str){ return str.toUpperCase(); } }
 }));
 
 app.set('view engine', '.hbs');
@@ -62,7 +63,11 @@ if (argv.refreshData) {
       var host = server.address().address;
       var port = server.address().port;
 
-      console.log('App listening at http://%s:%s', host, port);
+      config.logger.warn('App listening at http://%s:%s', host, port);
+      config.logger.info('Info log level is on.');
+      config.logger.debug('Debug log level is on.');
+      config.logger.trace('Trace log level is on.');
+
     });
   })
   .catch(function (err) {

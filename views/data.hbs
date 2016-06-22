@@ -4,7 +4,9 @@
   <div class="container mst-container-main mst-data-page">
 
     <div class="mst-button-row">
-      <a href="https://www.reddit.com/message/compose?to=%2Fr%2Fgunsarecool&subject=Mass%20Shooting%20Tracker%20data&message=" class="btn btn-default" target="_blank"><i class="fa fa-download"></i> Full data set available upon request.</a>
+      {{#each downloads}}
+        <a href={{link}} class="btn btn-default"><i class="fa fa-download"></i> {{year}} </a>
+      {{/each}}
     </div>
 
     <div class="row">
@@ -74,7 +76,7 @@ date: '2015-01-02T08:00:00.000Z' }
  <tr>
    <td>{{number}}</td>
    <td>{{displayDate}}</td>
-   <td>{{city}},&nbsp;{{state}}</td>
+   <td>{{city}},&nbsp;{{uppercase state}}</td>
    <td>{{killed}}</td>
    <td>{{wounded}}</td>
    <td>

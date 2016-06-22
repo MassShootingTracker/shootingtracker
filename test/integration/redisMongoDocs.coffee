@@ -9,7 +9,7 @@ sinon = require('sinon')
 path = require 'path'
 Data = require('../../services/data.js').Data
 
-describe 'GoogleDocs / Redis / Mongo Integration', ->
+describe 'GoogleDocs / Redis / Mongo', ->
 
   before (done) ->
     done()
@@ -41,7 +41,7 @@ describe 'GoogleDocs / Redis / Mongo Integration', ->
       redisClient.should.have.property('stream')
       done()
     )
-
+  
   it 'should get keys from the redis client', (done)->
     dl = getDataLayer()
     dl.should.be
@@ -65,7 +65,7 @@ describe 'GoogleDocs / Redis / Mongo Integration', ->
       done()
     )
 
-  it 'should get totals for all years', (done) ->
+  it 'post install - should get totals for all years', (done) ->
     dl = getDataLayer()
     dl.should.be
     dl.getTotals().catch(errorHandler).then( (result) ->
@@ -76,7 +76,7 @@ describe 'GoogleDocs / Redis / Mongo Integration', ->
       done()
     )
 
-  it 'should get data for 2015', (done)->
+  it 'post install - should get data for 2015', (done)->
     dl = getDataLayer()
     dl.should.be
     dl.getByYear(2015).catch((err) ->

@@ -1,3 +1,5 @@
+# mocha --compilers coffee:coffee-script/register ./test/integration/redisMongoDocs.coffee --timeout=45000 --ui bdd --debug-brk
+
 w = require('when')
 node = require('when/node')
 callbacks = require('when/callbacks')
@@ -25,7 +27,7 @@ class Data
       throw 'config is required!'
 
     webCapture = new (require './webCapture')(null, @logger)
-    archiver = new (require './archive_is')(@logger)
+    archiver = new (require('./archive_is'))(@logger)
 
     @config = config
     @csvUrls = config.googleDocs
