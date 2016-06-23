@@ -13,9 +13,9 @@
   "scripts": {
     "build": "gulp build",
     "test": "mocha test/integration/redisMongoDocs.js --grep \"post install\" --invert",
-    "debug": "gulp build && npm test && LOG_LEVEL=trace node index.js --debug",
-    "debug-brk": "gulp build &&  npm test && LOG_LEVEL=trace node index.js --debug-brk",
-    "start": "node index.js"
+    "debug": "gulp build && npm test && LOG_LEVEL=trace node --debug index.js ",
+    "debug-brk": "gulp build &&  npm test && LOG_LEVEL=trace node --debug-brk index.js ",
+    "start": "LOG_LEVEL=warn node index.js"
   },
   "license": "MIT",
   "dependencies": {

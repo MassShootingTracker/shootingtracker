@@ -51,7 +51,7 @@ if (process.env.REDISCLOUD_PORT) {
 }
 if (process.env.LOG_LEVEL) {
   conf.logLevel = process.env.LOG_LEVEL;
-} else {
+  } else {
   conf.logLevel = "warn"
 }
 

@@ -1,0 +1,44 @@
+Production, local, no debugger:
+========================================
+[Wed Jun 22 2016 16:37:40 GMT-0700 (PDT)] INFO Completed requests:  10000
+[Wed Jun 22 2016 16:37:40 GMT-0700 (PDT)] INFO Total errors:        0
+[Wed Jun 22 2016 16:37:40 GMT-0700 (PDT)] INFO Total time:          8.399009721 s
+[Wed Jun 22 2016 16:37:40 GMT-0700 (PDT)] INFO Requests per second: 1191
+[Wed Jun 22 2016 16:37:40 GMT-0700 (PDT)] INFO Total time:          8.399009721 s
+[Wed Jun 22 2016 16:37:40 GMT-0700 (PDT)] INFO
+[Wed Jun 22 2016 16:37:40 GMT-0700 (PDT)] INFO Percentage of the requests served within a certain time
+[Wed Jun 22 2016 16:37:40 GMT-0700 (PDT)] INFO   50%      7 ms
+[Wed Jun 22 2016 16:37:40 GMT-0700 (PDT)] INFO   90%      10 ms
+[Wed Jun 22 2016 16:37:40 GMT-0700 (PDT)] INFO   95%      11 ms
+[Wed Jun 22 2016 16:37:40 GMT-0700 (PDT)] INFO   99%      18 ms
+[Wed Jun 22 2016 16:37:40 GMT-0700 (PDT)] INFO  100%      87 ms (longest request)
+
+Production, local, with debugger:
+========================================
+[Wed Jun 22 2016 16:39:12 GMT-0700 (PDT)] INFO Completed requests:  10000
+[Wed Jun 22 2016 16:39:12 GMT-0700 (PDT)] INFO Total errors:        0
+[Wed Jun 22 2016 16:39:12 GMT-0700 (PDT)] INFO Total time:          14.059319884 s
+[Wed Jun 22 2016 16:39:12 GMT-0700 (PDT)] INFO Requests per second: 711
+[Wed Jun 22 2016 16:39:12 GMT-0700 (PDT)] INFO Total time:          14.059319884 s
+[Wed Jun 22 2016 16:39:12 GMT-0700 (PDT)] INFO
+[Wed Jun 22 2016 16:39:12 GMT-0700 (PDT)] INFO Percentage of the requests served within a certain time
+[Wed Jun 22 2016 16:39:12 GMT-0700 (PDT)] INFO   50%      13 ms
+[Wed Jun 22 2016 16:39:12 GMT-0700 (PDT)] INFO   90%      16 ms
+[Wed Jun 22 2016 16:39:12 GMT-0700 (PDT)] INFO   95%      18 ms
+[Wed Jun 22 2016 16:39:12 GMT-0700 (PDT)] INFO   99%      25 ms
+[Wed Jun 22 2016 16:39:12 GMT-0700 (PDT)] INFO  100%      133 ms (longest request)
+
+Production, local, no debugger, after changes to mongo connection:
+========================================
+[Wed Jun 22 2016 16:53:50 GMT-0700 (PDT)] INFO Completed requests:  10000
+[Wed Jun 22 2016 16:53:50 GMT-0700 (PDT)] INFO Total errors:        0
+[Wed Jun 22 2016 16:53:50 GMT-0700 (PDT)] INFO Total time:          10.134476331 s
+[Wed Jun 22 2016 16:53:50 GMT-0700 (PDT)] INFO Requests per second: 987
+[Wed Jun 22 2016 16:53:50 GMT-0700 (PDT)] INFO Total time:          10.134476331 s
+[Wed Jun 22 2016 16:53:50 GMT-0700 (PDT)] INFO
+[Wed Jun 22 2016 16:53:50 GMT-0700 (PDT)] INFO Percentage of the requests served within a certain time
+[Wed Jun 22 2016 16:53:50 GMT-0700 (PDT)] INFO   50%      8 ms
+[Wed Jun 22 2016 16:53:50 GMT-0700 (PDT)] INFO   90%      10 ms
+[Wed Jun 22 2016 16:53:50 GMT-0700 (PDT)] INFO   95%      11 ms
+[Wed Jun 22 2016 16:53:50 GMT-0700 (PDT)] INFO   99%      20 ms
+[Wed Jun 22 2016 16:53:50 GMT-0700 (PDT)] INFO  100%      308 ms (longest request)

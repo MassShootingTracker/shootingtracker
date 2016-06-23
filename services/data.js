@@ -76,6 +76,20 @@
         });
       }
       logger = this.logger;
+      mongoose.connect(this.mongoURL);
+      mongoose.connection.on('error', function(args) {
+        logger.error("Mongo connection error!");
+        logger.error(args);
+        throw new Error("Mongo connection failed, throw error for restart");
+      });
+      mongoose.connection.once('open', (function(_this) {
+        return function() {
+          _this.logger.info('Mongo connection open');
+          return _this.logger.debug({
+            args: arguments
+          });
+        };
+      })(this));
       process.on('unhandledRejection', (function(_this) {
         return function(reason, p) {
           return _this.logger.error('Possibly Unhandled Rejection at: Promise ', p, ' reason: ', reason);
@@ -115,20 +129,11 @@
       logger = this.logger;
       promise = w.promise((function(_this) {
         return function(resolve, reject) {
+          console.log("ready state: " + mongoose.connection.readyState);
           if (mongoose.Connection.STATES.connected === mongoose.connection.readyState) {
             return resolve(true);
           } else {
-            mongoose.connect(_this.mongoURL);
-            mongoose.connection.on('error', function(args) {
-              return logger.error(args);
-            });
-            return mongoose.connection.once('open', function() {
-              _this.logger.debug('Mongo connection open');
-              _this.logger.debug({
-                args: arguments
-              });
-              return resolve(true);
-            });
+            return logger.error("Mongoose connection expired?");
           }
         };
       })(this));

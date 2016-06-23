@@ -47,6 +47,17 @@ class Data
       @logger = (require 'bunyan')({name: 'mst-data', level: (config.logging?.level? or 10)})
     logger = @logger
 
+    # connect to mongo when the app starts
+    mongoose.connect @mongoURL
+    mongoose.connection.on 'error', (args) ->
+      logger.error "Mongo connection error!"
+      logger.error(args)
+      throw new Error "Mongo connection failed, throw error for restart"
+    mongoose.connection.once 'open', =>
+      @logger.info 'Mongo connection open'
+      @logger.debug args: arguments
+
+
     process.on 'unhandledRejection', (reason, p) =>
       @logger.error 'Possibly Unhandled Rejection at: Promise ', p, ' reason: ', reason
 
@@ -75,16 +86,11 @@ class Data
     logger = @logger
 
     promise = w.promise (resolve, reject) =>
+      console.log "ready state: " +  mongoose.connection.readyState
       if mongoose.Connection.STATES.connected == mongoose.connection.readyState
         resolve(true)
       else
-        mongoose.connect @mongoURL
-        mongoose.connection.on 'error', (args) ->
-          logger.error(args)
-        mongoose.connection.once 'open', =>
-          @logger.debug 'Mongo connection open'
-          @logger.debug args: arguments
-          resolve(true)
+        logger.error "Mongoose connection expired?"
 
     return promise
 
