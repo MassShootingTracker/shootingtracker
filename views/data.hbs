@@ -3,13 +3,57 @@
 <div class="container-fluid">
   <div class="container mst-container-main mst-data-page">
 
-    <div class="mst-button-row">
-      {{#each downloads}}
-        <a href={{link}} class="btn btn-default"><i class="fa fa-download"></i> {{year}} </a>
-      {{/each}}
+
+    <div class="row">
+      <div class="col-sm-8">
+
+        <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+          <div class="panel panel-default">
+            <div class="panel-heading" role="tab" id="headingOne">
+              <h4 class="panel-title">
+                <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                  Download the data <i class="fa fa-caret-down"></i>
+                </a>
+              </h4>
+            </div>
+            <div id="collapseOne" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
+              <div class="panel-body">
+                <h4>About the data</h4>
+                <p>This data is compiled by an independent all volunteer group
+                  based out of <a href="https://reddit.com/r/GunsAreCool">reddit</a>.<p>
+
+                <p>The data is free to use and share. If publishing this data, please cite MassShootingTracker.org or reddit.com/r/GunsAreCool.</p>
+
+                <p>Questions? <a href="https://www.reddit.com/message/compose?to=%2Fr%2Fgunsarecool">Message r/GunsAreCool</a> or <a href="mailto:massshootingtrackerinfo@gmail.com">Email us</a>.</p>
+
+                <h4>Want to get involved?</h4>
+                <p><a href="https://www.reddit.com/message/compose?to=%2Fr%2Fgunsarecool">Learn how you can help!</a><p>
+                <p><a href="https://twitter.com/massshootingtrk">Follow us on twitter!</a></p>
+
+                <h4>CSV files organized by year:</h4>
+
+                <div class="mst-button-row">
+                  {{#each downloads}}
+                    <a href={{link}} class="btn btn-default"><i class="fa fa-download"></i> {{year}} </a>
+                  {{/each}}
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+      <div class="col-sm-2">
+        <button class="btn btn-primary btn-sm" id="fb-share"><i class="fa fa-facebook"></i> Share on Facebook</button>
+      </div>
+
+      <div class="col-sm-2">
+        <a href="https://twitter.com/share" class="twitter-share-button" data-text="There have been {{data.length}} mass shootings in {{year}}." data-via="massshootingtrk" data-size="large" data-related="massshootingtrk" data-hashtags="massshootingtracker">Tweet</a>
+      </div>
     </div>
 
     <div class="row">
+
       <div class="col-sm-12">
         <ul class="list-inline">
           {{#if is2016}}
@@ -105,4 +149,16 @@ date: '2015-01-02T08:00:00.000Z' }
 <script id="shooting-data">
   window.data = {{{dataJson}}};
   window.year = {{{year}}};
+</script>
+
+<script>
+document.getElementById('fb-share').onclick = function() {
+  FB.ui({
+    method: 'share',
+    display: 'popup',
+    quote: 'There have been {{data.length}} mass shootings in {{year}}.',
+    hashtag: '#massshootingtracker',
+    href: 'https://massshootingtracker.org',
+  }, function(response){});
+}
 </script>

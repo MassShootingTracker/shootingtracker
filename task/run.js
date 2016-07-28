@@ -3,7 +3,6 @@
 var gulp = require('gulp');
 var path = require('path');
 var nodemon = require('gulp-nodemon');
-var shell = require('gulp-shell');
 var _ = require('lodash');
 var sequence = require('run-sequence');
 var yargs = require('yargs').argv;
