@@ -3,6 +3,7 @@
 
     <title>Mass Shooting Tracker</title>
     <meta name="description" content="Mass shooting tracker: A crowd sourced database of U.S. mass shootings.">
+    <meta name="google-site-verification" content="eCqbueQlF9xJ9L46n95FVPRSj2r4zL09097LG6hHRa4" />
     <meta charset="UTF-8">
 
     <link href='https://fonts.googleapis.com/css?family=Raleway' rel='stylesheet' type='text/css'>
@@ -14,6 +15,8 @@
     <script src="https://code.highcharts.com/highcharts.js"></script>
     <script src="https://code.highcharts.com/modules/data.js"></script>
     <script src="https://code.highcharts.com/modules/drilldown.js"></script>
+    <script src="https://code.highcharts.com/modules/exporting.js"></script>
+<script src="https://code.highcharts.com/modules/offline-exporting.js"></script>
 
     <script src="/js/main.js"></script>
 
@@ -45,8 +48,17 @@
       return t;
     }(document, "script", "twitter-wjs"));</script>
 
+
   </head>
   <body>
+    <div id="fb-root"></div>
+    <script>(function(d, s, id) {
+      var js, fjs = d.getElementsByTagName(s)[0];
+      if (d.getElementById(id)) return;
+      js = d.createElement(s); js.id = id;
+      js.src = "//connect.facebook.net/en_US/sdk.js#xfbml=1&version=v2.6&appId=998197633596789";
+      fjs.parentNode.insertBefore(js, fjs);
+    }(document, 'script', 'facebook-jssdk'));</script>
     {{{body}}}
   </body>
 </html>
