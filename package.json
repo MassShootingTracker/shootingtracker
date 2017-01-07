@@ -15,7 +15,9 @@
     "test": "mocha test/integration/redisMongoDocs.js --grep \"post install\" --invert",
     "debug": "gulp build && npm test && LOG_LEVEL=trace node --debug index.js ",
     "debug-brk": "gulp build &&  npm test && LOG_LEVEL=trace node --debug-brk index.js ",
-    "start": "LOG_LEVEL=warn node index.js"
+    "start": "LOG_LEVEL=warn node index.js",
+    "update": "curl --data \"key=fkjnwkj2nk3r43tklnf4al&year=2016\" http://localhost:3030/update",
+    "pm2":"pm2 start npm --name=mst -- start"
   },
   "license": "MIT",
   "dependencies": {

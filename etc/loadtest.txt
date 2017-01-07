@@ -42,3 +42,68 @@ Production, local, no debugger, after changes to mongo connection:
 [Wed Jun 22 2016 16:53:50 GMT-0700 (PDT)] INFO   95%      11 ms
 [Wed Jun 22 2016 16:53:50 GMT-0700 (PDT)] INFO   99%      20 ms
 [Wed Jun 22 2016 16:53:50 GMT-0700 (PDT)] INFO  100%      308 ms (longest request)
+
+Production, DO, no debugger, after changes to mongo connection:
+========================================
+[Wed Jun 22 2016 17:42:43 GMT-0700 (PDT)] INFO Target URL:          http://192.81.215.60:3030
+[Wed Jun 22 2016 17:42:43 GMT-0700 (PDT)] INFO Max requests:        1000
+[Wed Jun 22 2016 17:42:43 GMT-0700 (PDT)] INFO Concurrency level:   10
+[Wed Jun 22 2016 17:42:43 GMT-0700 (PDT)] INFO Agent:               none
+[Wed Jun 22 2016 17:42:43 GMT-0700 (PDT)] INFO
+[Wed Jun 22 2016 17:42:43 GMT-0700 (PDT)] INFO Completed requests:  1000
+[Wed Jun 22 2016 17:42:43 GMT-0700 (PDT)] INFO Total errors:        0
+[Wed Jun 22 2016 17:42:43 GMT-0700 (PDT)] INFO Total time:          24.97168967 s
+[Wed Jun 22 2016 17:42:43 GMT-0700 (PDT)] INFO Requests per second: 40
+[Wed Jun 22 2016 17:42:43 GMT-0700 (PDT)] INFO Total time:          24.97168967 s
+[Wed Jun 22 2016 17:42:43 GMT-0700 (PDT)] INFO
+[Wed Jun 22 2016 17:42:43 GMT-0700 (PDT)] INFO Percentage of the requests served within a certain time
+[Wed Jun 22 2016 17:42:43 GMT-0700 (PDT)] INFO   50%      196 ms
+[Wed Jun 22 2016 17:42:43 GMT-0700 (PDT)] INFO   90%      256 ms
+[Wed Jun 22 2016 17:42:43 GMT-0700 (PDT)] INFO   95%      536 ms
+[Wed Jun 22 2016 17:42:43 GMT-0700 (PDT)] INFO   99%      1272 ms
+[Wed Jun 22 2016 17:42:43 GMT-0700 (PDT)] INFO  100%      1441 ms (longest request)
+
+Production, DO, debugger, after changes to mongo connection:
+========================================
+
+Linode, Mongolab
+=======================================================
+$ node_modules/.bin/loadtest -n 1000 -c 10 http://45.79.75.107:3030
+[Sat Jun 25 2016 14:04:48 GMT-0700 (PDT)] INFO Requests: 0 (0%), requests per second: 0, mean latency: 0 ms
+[Sat Jun 25 2016 14:04:53 GMT-0700 (PDT)] INFO Requests: 362 (36%), requests per second: 72, mean latency: 130 ms
+[Sat Jun 25 2016 14:04:58 GMT-0700 (PDT)] INFO Requests: 674 (67%), requests per second: 62, mean latency: 160 ms
+[Sat Jun 25 2016 14:05:03 GMT-0700 (PDT)] INFO Requests: 752 (75%), requests per second: 16, mean latency: 610 ms
+[Sat Jun 25 2016 14:05:08 GMT-0700 (PDT)] INFO Requests: 778 (78%), requests per second: 5, mean latency: 1250 ms
+[Sat Jun 25 2016 14:05:13 GMT-0700 (PDT)] INFO Requests: 798 (80%), requests per second: 4, mean latency: 600 ms
+[Sat Jun 25 2016 14:05:18 GMT-0700 (PDT)] INFO Requests: 810 (81%), requests per second: 2, mean latency: 3760 ms
+[Sat Jun 25 2016 14:05:23 GMT-0700 (PDT)] INFO Requests: 815 (82%), requests per second: 1, mean latency: 1280 ms
+[Sat Jun 25 2016 14:05:28 GMT-0700 (PDT)] INFO Requests: 817 (82%), requests per second: 0, mean latency: 7090 ms
+[Sat Jun 25 2016 14:05:33 GMT-0700 (PDT)] INFO Requests: 827 (83%), requests per second: 2, mean latency: 1000 ms
+[Sat Jun 25 2016 14:05:38 GMT-0700 (PDT)] INFO Requests: 829 (83%), requests per second: 0, mean latency: 3260 ms
+[Sat Jun 25 2016 14:05:43 GMT-0700 (PDT)] INFO Requests: 832 (83%), requests per second: 1, mean latency: 4770 ms
+[Sat Jun 25 2016 14:05:48 GMT-0700 (PDT)] INFO Requests: 832 (83%), requests per second: 0, mean latency: 0 ms
+[Sat Jun 25 2016 14:05:53 GMT-0700 (PDT)] INFO Requests: 832 (83%), requests per second: 0, mean latency: 0 ms
+[Sat Jun 25 2016 14:05:58 GMT-0700 (PDT)] INFO Requests: 834 (83%), requests per second: 0, mean latency: 7590 ms
+[Sat Jun 25 2016 14:06:03 GMT-0700 (PDT)] INFO Requests: 834 (83%), requests per second: 0, mean latency: 0 ms
+[Sat Jun 25 2016 14:06:08 GMT-0700 (PDT)] INFO Requests: 834 (83%), requests per second: 0, mean latency: 0 ms
+[Sat Jun 25 2016 14:06:13 GMT-0700 (PDT)] INFO Requests: 835 (84%), requests per second: 0, mean latency: 63190 ms
+[Sat Jun 25 2016 14:06:18 GMT-0700 (PDT)] INFO Requests: 835 (84%), requests per second: 0, mean latency: 0 ms
+[Sat Jun 25 2016 14:06:23 GMT-0700 (PDT)] INFO Requests: 905 (91%), requests per second: 14, mean latency: 1900 ms
+[Sat Jun 25 2016 14:06:26 GMT-0700 (PDT)] INFO
+[Sat Jun 25 2016 14:06:26 GMT-0700 (PDT)] INFO Target URL:          http://45.79.75.107:3030
+[Sat Jun 25 2016 14:06:26 GMT-0700 (PDT)] INFO Max requests:        1000
+[Sat Jun 25 2016 14:06:26 GMT-0700 (PDT)] INFO Concurrency level:   10
+[Sat Jun 25 2016 14:06:26 GMT-0700 (PDT)] INFO Agent:               none
+[Sat Jun 25 2016 14:06:26 GMT-0700 (PDT)] INFO
+[Sat Jun 25 2016 14:06:26 GMT-0700 (PDT)] INFO Completed requests:  1000
+[Sat Jun 25 2016 14:06:26 GMT-0700 (PDT)] INFO Total errors:        0
+[Sat Jun 25 2016 14:06:26 GMT-0700 (PDT)] INFO Total time:          98.65600679699999 s
+[Sat Jun 25 2016 14:06:26 GMT-0700 (PDT)] INFO Requests per second: 10
+[Sat Jun 25 2016 14:06:26 GMT-0700 (PDT)] INFO Total time:          98.65600679699999 s
+[Sat Jun 25 2016 14:06:26 GMT-0700 (PDT)] INFO
+[Sat Jun 25 2016 14:06:26 GMT-0700 (PDT)] INFO Percentage of the requests served within a certain time
+[Sat Jun 25 2016 14:06:26 GMT-0700 (PDT)] INFO   50%      104 ms
+[Sat Jun 25 2016 14:06:26 GMT-0700 (PDT)] INFO   90%      270 ms
+[Sat Jun 25 2016 14:06:26 GMT-0700 (PDT)] INFO   95%      1150 ms
+[Sat Jun 25 2016 14:06:26 GMT-0700 (PDT)] INFO   99%      7106 ms
+[Sat Jun 25 2016 14:06:26 GMT-0700 (PDT)] INFO  100%      63237 ms (longest request)
