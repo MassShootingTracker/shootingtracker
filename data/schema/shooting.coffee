@@ -1,4 +1,5 @@
 mongoose = require('mongoose')
+mongoose.Promise = require('bluebird')
 
 shooting = new mongoose.Schema({
   date: Date,

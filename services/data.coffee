@@ -4,6 +4,7 @@ w = require('when')
 node = require('when/node')
 callbacks = require('when/callbacks')
 mongoose = require('mongoose')
+mongoose.Promise = require('bluebird')
 Shooting = require('.././data/schema/shooting')
 Reference = require('.././data/schema/reference')
 
@@ -273,11 +274,10 @@ class Data
 
   updateFromCSV: (input) =>
     logger = @logger
-    logger.trace "starting update from csv"
+    logger.debug "starting update from csv"
     yearsInCSV = []
     {data, year} = input
-    logger.debug "data sample"
-    logger.debug dataSample: data[0] if data?[0]?
+    logger.debug "data sample: ", data[0] if data?[0]
     if (not data) or data.length == 0
       logger.warn "data input is 0, returning"
       return 0
@@ -391,7 +391,7 @@ class Data
     promise = w.promise (resolve, reject) ->
       converter.fromString csvStr, (err, result) ->
         reject(err) if err?
-        logger.debug "csv records count": result.length
+        logger.debug "Got records from CSV, count: ", result.length
         resolve(result)
 
   processArchives: (cb) =>

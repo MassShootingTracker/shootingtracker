@@ -17,10 +17,11 @@
     "debug-brk": "gulp build &&  npm test && LOG_LEVEL=trace node --debug-brk index.js ",
     "start": "LOG_LEVEL=warn node index.js",
     "update": "curl --data \"key=fkjnwkj2nk3r43tklnf4al&year=2016\" http://localhost:3030/update",
-    "pm2":"pm2 start npm --name=mst -- start"
+    "pm2": "pm2 start npm --name=mst -- start"
   },
   "license": "MIT",
   "dependencies": {
+    "bluebird": "~3.4.7",
     "body-parser": "~1.15.1",
     "bunyan": "^1.8.1",
     "chai": "~3.5.0",

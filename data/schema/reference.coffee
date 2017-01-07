@@ -1,4 +1,5 @@
 mongoose = require('mongoose')
+mongoose.Promise = require('bluebird')
 
 reference = new mongoose.Schema({
   url: {type: String, index: true},

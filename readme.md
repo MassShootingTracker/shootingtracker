@@ -16,11 +16,11 @@
 
 ### 3. Navigate to page
 
-`http://127.0.0.1:5000`
+`http://127.0.0.1:3030`
 
 ### Refresh data from google docs
 
-From a bash command line: `curl --data "key=[api key from config]" http://[url]:[port]/update` when the site is running. For prior years add the year to the data: `curl --data "key=fkjnwkj2nk3r43tklnf4al&year=2014" http://localhost:3000/update` 
+From a bash command line: `curl --data "key=[api key from config]" http://[url]:[port]/update` when the site is running. For prior years add the year to the data: `curl --data "key=fkjnwkj2nk3r43tklnf4al&year=2014" http://localhost:3030/update` 
 
 ### Debugging:
 

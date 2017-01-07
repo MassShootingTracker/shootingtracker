@@ -10,6 +10,8 @@
 
   mongoose = require('mongoose');
 
+  mongoose.Promise = require('bluebird');
+
   Shooting = require('.././data/schema/shooting');
 
   Reference = require('.././data/schema/reference');
@@ -396,7 +398,7 @@
               year: +year
             }).remove();
           }).then(logger.info("removed all records for year:" + year)).then(function(conn) {
-            var checked, d, e, entry, error, i, j, len, len1, n, ref, ref1, results, total;
+            var checked, d, e, entry, i, j, len, len1, n, ref, ref1, results, total;
             try {
               logger.debug('connected to mongo; pushing new values into db');
               ref = data;
@@ -531,7 +533,7 @@
       var promise;
       promise = w.promise((function(_this) {
         return function(resolve, reject) {
-          var e, error;
+          var e;
           logger.debug('finding unarchived documents');
           try {
             return Reference.find({
