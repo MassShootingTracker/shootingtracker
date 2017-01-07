@@ -8,7 +8,7 @@ var config = require('../config');
 var Data = require('../services/data.js').Data;
 var dataLayer = null;
 var app = null;
-var currentYear = new Date().getFullYear()+'';
+var currentYear = new Date().getFullYear() + '';
 
 function Index(appArg) {
   this.app = appArg;
@@ -130,32 +130,41 @@ Index.prototype.datapage = function datapage(req, res, next) {
 
   config.logger.debug('building datapage with param: ' + year);
   dataLayer.getByYear(year).then(function (shootings) {
-      app.locals.data = shootings;
+    app.locals.data = shootings;
+    var currentYear = +new Date().getFullYear();
 
-      app.locals.downloads = Object.keys(config.googleDocs).map(function(key) {
-        return {
-          year: String(key),
-          link: config.googleDocs[key]
-        };
-      });
-      //console.dir(data[0])
+    app.locals.downloads = Object.keys(config.googleDocs).filter(function (key) {
+      return +key <= currentYear;
+    }).map(function (key) {
+      return {
+        year:String(key),
+        link:config.googleDocs[key]
+      };
+    });
 
-      var _i, _len, shooting;
-      for (_i = 0, _len = shootings.length; _i < _len; _i++) {
-        shooting = shootings[_i];
-        shooting.displayDate = new moment(shooting.date).format("MM/DD/YYYY");
-        shooting.number = shootings.length - _i;
-      }
 
-      res.render('data', {
-        dataJson:JSON.stringify(shootings),
-        year:year,
-        currentYear: currentYear,
-        is2016: year === "2016",
-        is2015:year === "2015",
-        is2014:year === "2014",
-        is2013:year === "2013"
-      });
-    })
+    app.locals.years = [];
+    app.locals.year = year;
+    var n = 2013;
+    var c = '' ;
+    while (n <= currentYear) {
+      if (+year == n){ c = 'active'} else {c = ''}
+      app.locals.years.push({year: n++, class: c});
+    }
+    //console.dir(data[0])
+
+    var _i, _len, shooting;
+    for (_i = 0, _len = shootings.length; _i < _len; _i++) {
+      shooting = shootings[_i];
+      shooting.displayDate = new moment(shooting.date).format("MM/DD/YYYY");
+      shooting.number = shootings.length - _i;
+    }
+
+    res.render('data', {
+      dataJson:JSON.stringify(shootings),
+      year:year,
+      currentYear:currentYear
+    });
+  })
     .catch(next);
 }

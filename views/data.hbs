@@ -34,7 +34,7 @@
 
                 <div class="mst-button-row">
                   {{#each downloads}}
-                    <a href={{link}} class="btn btn-default"><i class="fa fa-download"></i> {{year}} </a>
+                    <a href={{link}} class="btn btn-default"/><i class="fa fa-download"></i> {{year}} </a>
                   {{/each}}
                 </div>
               </div>
@@ -56,26 +56,9 @@
 
       <div class="col-sm-12">
         <ul class="list-inline">
-          {{#if is2016}}
-            <li class="active" ><a href="/data/2016">2016</a></li>
-          {{else}}
-            <li><a href="/data/2016">2016</a></li>
-          {{/if}}
-          {{#if is2015}}
-            <li class="active" ><a href="/data/2015">2015</a></li>
-          {{else}}
-            <li><a href="/data/2015">2015</a></li>
-          {{/if}}
-          {{#if is2014}}
-            <li class="active"><a  href="/data/2014">2014</a></li>
-          {{else}}
-            <li><a href="/data/2014">2014</a></li>
-          {{/if}}
-          {{#if is2013}}
-            <li class="active"><a href="/data/2013">2013</a></li>
-          {{else}}
-            <li><a href="/data/2013">2013</a></li>
-          {{/if}}
+          {{#each years}}
+            <li class="{{this.class}}" ><a href="/data/{{this.year}}">{{this.year}}</a></li>
+          {{/each}}
         </ul>
       </div>
     </div>
