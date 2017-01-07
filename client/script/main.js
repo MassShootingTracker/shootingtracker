@@ -56,6 +56,15 @@ function initChart() {
   });
 
   $chartContainer.highcharts({
+        exporting: {
+            scale: 3,
+            fallbackToExportServer: false
+        },
+        credits: {
+            enabled: true
+            href: "http://www.massshootingtracker.org"
+            text: "MassShootingTracker.org"
+        },
         chart: {
             type: 'column'
         },
