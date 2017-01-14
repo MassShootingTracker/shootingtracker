@@ -87,7 +87,7 @@ class Data
     logger = @logger
 
     promise = w.promise (resolve, reject) =>
-      console.log "ready state: " +  mongoose.connection.readyState
+      logger.trace "ready state: " +  mongoose.connection.readyState
       if mongoose.Connection.STATES.connected == mongoose.connection.readyState
         resolve(true)
       else
@@ -396,13 +396,13 @@ class Data
 
   processArchives: (cb) =>
     promise = w.promise (resolve, reject) =>
-      # we are doing 20 of these at a time with a delay to avoid getting cut off by archive.is
+      # we are doing 10 of these at a time with a delay to avoid getting cut off by archive.is
       logger.debug 'finding unarchived documents'
       try
         Reference.find(
-          archiveUrl: {$eq: null}
+          $or: [{archiveUrl: {$eq: null}},{archiveUrl: {$exists: false}}]
         )
-        .limit(20)
+        .limit(10)
         .exec (err, docs) ->
           c = docs.length
           if c == 0
@@ -410,10 +410,14 @@ class Data
           if err?
             reject(err)
 
+          ###
+          edit: mostlycarbonite, Jan 2017: damn this code could really benefit from
+          some Promise.map and concurrency limits; but it works as is :/
+          ###
           d = 0
           e = 0
-          delayInc = 200
-          delay = 100
+          delayInc = 2000
+          delay = 10000
           logger.debug "checking archive for #{c} entries"
 
           checkExit = ->
@@ -433,9 +437,8 @@ class Data
             archiver.check(url, (err, result) ->
               if err?
                 ++e
-                logger.error(error: err)
-                reject(err)
-              if result.url?
+                logger.error(err)
+              else if result?.url?
                 logger.debug "archive url for #{url}: #{result.url}; saving"
                 doc.archiveUrl = result.url
                 doc.save()
@@ -520,7 +523,7 @@ class Data
                   logger.error err
                   reject(err)
                 else if docs?.length == 0
-                  logger.trace "creating new Reference"
+                  logger.debug "creating new Reference"
                   new Reference(url: url, archiveUrl: null, capturePath: null).save()
                 else
                   logger.trace "reference exists, skipping"

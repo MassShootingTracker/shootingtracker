@@ -4,6 +4,7 @@ var _ = require('lodash');
 var Api = require('./api');
 var path = require('path');
 var moment = require('moment');
+var request = require('request');
 var config = require('../config');
 var Data = require('../services/data.js').Data;
 var dataLayer = null;
@@ -67,6 +68,11 @@ Index.prototype.register = function () {
     dataLayer.pullSheetData(year)
       .then(function (sheet) {
         return dataLayer.updateFromCSV(sheet);
+      })
+      .then(function () {
+        if (config.archive) {
+          return dataLayer.processArchives()
+        }
       })
       .then(function (results) {
         res.status(200).send('Done')
@@ -174,7 +180,7 @@ Index.prototype.datapage = function datapage(req, res, next) {
       year:displayYear,
       helpers:{
         lowercase:function (s) {
-          return (''+s).toLowerCase();
+          return ('' + s).toLowerCase();
         }
       }
     });

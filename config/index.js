@@ -54,6 +54,9 @@ if (process.env.LOG_LEVEL) {
   } else {
   conf.logLevel = "warn"
 }
+if (process.env.ARCHIVE) {
+  conf.archive = !!process.env.ARCHIVE;
+}
 
 console.log("Log level set to: "+conf.logLevel);
 

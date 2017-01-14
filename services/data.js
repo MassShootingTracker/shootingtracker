@@ -131,7 +131,7 @@
       logger = this.logger;
       promise = w.promise((function(_this) {
         return function(resolve, reject) {
-          console.log("ready state: " + mongoose.connection.readyState);
+          logger.trace("ready state: " + mongoose.connection.readyState);
           if (mongoose.Connection.STATES.connected === mongoose.connection.readyState) {
             return resolve(true);
           } else {
@@ -532,10 +532,18 @@
           logger.debug('finding unarchived documents');
           try {
             return Reference.find({
-              archiveUrl: {
-                $eq: null
-              }
-            }).limit(20).exec(function(err, docs) {
+              $or: [
+                {
+                  archiveUrl: {
+                    $eq: null
+                  }
+                }, {
+                  archiveUrl: {
+                    $exists: false
+                  }
+                }
+              ]
+            }).limit(10).exec(function(err, docs) {
               var c, checkExit, checkUrl, d, delay, delayInc, doc, e, j, len1, results;
               c = docs.length;
               if (c === 0) {
@@ -544,10 +552,15 @@
               if (err != null) {
                 reject(err);
               }
+
+              /*
+              edit: mostlycarbonite, Jan 2017: damn this code could really benefit from
+              some Promise.map and concurrency limits; but it works as is :/
+               */
               d = 0;
               e = 0;
-              delayInc = 200;
-              delay = 100;
+              delayInc = 2000;
+              delay = 10000;
               logger.debug("checking archive for " + c + " entries");
               checkExit = function() {
                 var message;
@@ -568,12 +581,8 @@
                 return archiver.check(url, function(err, result) {
                   if (err != null) {
                     ++e;
-                    logger.error({
-                      error: err
-                    });
-                    reject(err);
-                  }
-                  if (result.url != null) {
+                    logger.error(err);
+                  } else if ((result != null ? result.url : void 0) != null) {
                     logger.debug("archive url for " + url + ": " + result.url + "; saving");
                     doc.archiveUrl = result.url;
                     doc.save();
@@ -688,7 +697,7 @@
                       logger.error(err);
                       reject(err);
                     } else if ((docs != null ? docs.length : void 0) === 0) {
-                      logger.trace("creating new Reference");
+                      logger.debug("creating new Reference");
                       new Reference({
                         url: url,
                         archiveUrl: null,
