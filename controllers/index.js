@@ -125,6 +125,7 @@ Index.prototype.aboutus = function aboutus(req, res, next) {
 };
 
 Index.prototype.datapage = function datapage(req, res, next) {
+  var isAllYears = req.params.year === 'all';
 
   var year = req.params.year || String(new Date().getFullYear());
 
@@ -144,10 +145,11 @@ Index.prototype.datapage = function datapage(req, res, next) {
 
     app.locals.years = [];
     app.locals.year = year;
-    var n = 2013; // first year that has data
+    var firstYear = 2013; // first year that has data
+    var n = firstYear;
     var c = '';
     while (n <= currentYear) {
-      if (+year == n) {
+      if (+year == n || isAllYears) {
         c = 'active'
       } else {
         c = ''
@@ -163,8 +165,13 @@ Index.prototype.datapage = function datapage(req, res, next) {
       shooting.number = shootings.length - _i;
     }
 
+    var displayYear = year;
+    if (isAllYears) {
+      displayYear = 'all years (' + firstYear + ' - ' + currentYear +')';
+    }
     res.render('data', {
-      dataJson:JSON.stringify(shootings)
+      dataJson:JSON.stringify(shootings),
+      year:displayYear
     });
   })
     .catch(next);

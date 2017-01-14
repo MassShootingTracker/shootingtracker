@@ -371,14 +371,11 @@
     Data.prototype.updateFromCSV = function(input) {
       var data, deleteRedisKey, promise, year, yearsInCSV;
       logger = this.logger;
-      logger.trace("starting update from csv");
+      logger.debug("starting update from csv");
       yearsInCSV = [];
       data = input.data, year = input.year;
-      logger.debug("data sample");
-      if ((data != null ? data[0] : void 0) != null) {
-        logger.debug({
-          dataSample: data[0]
-        });
+      if (data != null ? data[0] : void 0) {
+        logger.debug("data sample: ", data[0]);
       }
       if ((!data) || data.length === 0) {
         logger.warn("data input is 0, returning");
@@ -521,9 +518,7 @@
           if (err != null) {
             reject(err);
           }
-          logger.debug({
-            "csv records count": result.length
-          });
+          logger.debug("Got records from CSV, count: ", result.length);
           return resolve(result);
         });
       });
