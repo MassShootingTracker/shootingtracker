@@ -145,6 +145,7 @@ Index.prototype.datapage = function datapage(req, res, next) {
 
     app.locals.years = [];
     app.locals.year = year;
+    app.locals.years.push({year:'All', class:isAllYears ? 'active' : ''});
     var firstYear = 2013; // first year that has data
     var n = firstYear;
     var c = '';
@@ -156,7 +157,6 @@ Index.prototype.datapage = function datapage(req, res, next) {
       }
       app.locals.years.push({year:n++, class:c});
     }
-    //console.dir(data[0])
 
     var _i, _len, shooting;
     for (_i = 0, _len = shootings.length; _i < _len; _i++) {
@@ -167,11 +167,16 @@ Index.prototype.datapage = function datapage(req, res, next) {
 
     var displayYear = year;
     if (isAllYears) {
-      displayYear = 'all years (' + firstYear + ' - ' + currentYear +')';
+      displayYear = 'all years (' + firstYear + ' - ' + currentYear + ')';
     }
     res.render('data', {
       dataJson:JSON.stringify(shootings),
-      year:displayYear
+      year:displayYear,
+      helpers:{
+        lowercase:function (s) {
+          return (''+s).toLowerCase();
+        }
+      }
     });
   })
     .catch(next);

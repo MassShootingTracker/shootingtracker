@@ -57,7 +57,7 @@
       <div class="col-sm-12">
         <ul class="list-inline">
           {{#each years}}
-            <li class="{{this.class}}" ><a href="/data/{{this.year}}">{{this.year}}</a></li>
+            <li class="{{this.class}} " ><a href="/data/{{lowercase year}}">{{this.year}}</a></li>
           {{/each}}
         </ul>
       </div>
@@ -131,7 +131,7 @@ date: '2015-01-02T08:00:00.000Z' }
 
 <script id="shooting-data">
   window.year = '{{year}}';
-  window.data = {{{dataJson}}};
+  window.data = {{{dataJson}}};  /// this line has to remain triple braced!
 </script>
 
 <script>
