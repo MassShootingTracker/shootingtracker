@@ -30,14 +30,16 @@ class WebCapture
     pathWithHost = path.join(capturesSavePath, sanitize(hostName), "#{fileName}-#{new moment().format('DD-MMM-YYYY')}.png")
     @captureList = null
     capturePath = path.join(process.cwd(), pathWithHost)
-    options =  shotSize: { width: captureWidth , height: captureHeight, quality: captureQuality }
+    options = shotSize: {width: captureWidth, height: captureHeight, quality: captureQuality}
 
-    webshotLib(url, capturePath, options, (err) ->
-      if err? cb(err, null)
-      else cb(null, pathWithHost)
+    webshotLib(url, capturePath, options, (err) =>
+      if err?
+        @logger.trace "capture failed: ", err
+        cb(err, null)
+      else
+        @logger.trace "capture complete: #{pathWithHost}"
+        cb(null, pathWithHost)
     )
-
-
 
 
 module.exports = WebCapture

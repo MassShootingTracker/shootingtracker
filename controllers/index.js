@@ -41,7 +41,10 @@ Index.prototype.register = function () {
     }
     logger.debug("api key correct, starting update");
 
-    dataLayer.connectToMongo().then(dataLayer.processArchives)
+    dataLayer.connectToMongo()
+      .then(function () {
+        return dataLayer.processArchives()
+      })
       .then(function (message) {
         logger.info('done with archiving, result: ' + message);
         res.status(200).send(message);
@@ -69,13 +72,19 @@ Index.prototype.register = function () {
       .then(function (sheet) {
         return dataLayer.updateFromCSV(sheet);
       })
+      .then(function (results) {
+        if (config.archive) {
+          res.status(200).send('Update complete, archiving in process.')
+        } else {
+          res.status(200).send('Update complete.')
+        }
+      })
       .then(function () {
         if (config.archive) {
           return dataLayer.processArchives()
+        } else {
+          logger.debug("Archive skipped.")
         }
-      })
-      .then(function (results) {
-        res.status(200).send('Done')
       })
       .catch(next);
   });

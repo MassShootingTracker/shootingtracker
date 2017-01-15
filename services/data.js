@@ -378,7 +378,7 @@
         logger.debug("data sample: ", data[0]);
       }
       if ((!data) || data.length === 0) {
-        logger.warn("data input is 0, returning");
+        logger.trace("update from csv has no records in input, returning");
         return 0;
       }
       deleteRedisKey = this.deleteRedisKey;
@@ -529,21 +529,21 @@
       promise = w.promise((function(_this) {
         return function(resolve, reject) {
           var e;
-          logger.debug('finding unarchived documents');
+          logger.info('Finding unarchived documents');
           try {
             return Reference.find({
               $or: [
                 {
-                  archiveUrl: {
+                  screenshotPath: {
                     $eq: null
                   }
                 }, {
-                  archiveUrl: {
+                  screenshotPath: {
                     $exists: false
                   }
                 }
               ]
-            }).limit(10).exec(function(err, docs) {
+            }).limit(20).exec(function(err, docs) {
               var c, checkExit, checkUrl, d, delay, delayInc, doc, e, j, len1, results;
               c = docs.length;
               if (c === 0) {
@@ -564,35 +564,46 @@
               logger.debug("checking archive for " + c + " entries");
               checkExit = function() {
                 var message;
-                if (e >= c) {
-                  message = "All urls failed. See logs.";
-                  reject(message);
-                } else if (e > 0) {
-                  message = "Some urls encountered an error, check logs.";
-                } else if (d >= c) {
-                  message = "OK";
-                }
-                if (!!message) {
+                if (d === c) {
+                  if (e >= c) {
+                    message = "All urls failed. See logs.";
+                    reject(message);
+                  } else if (e > 0) {
+                    message = "Some urls encountered an error, check logs.";
+                  } else if (d >= c) {
+                    message = "OK";
+                  }
+                  logger.info("Exiting processArchives, " + d + " done, " + e + " errors.", message);
                   return resolve(message);
                 }
               };
               checkUrl = function(url, doc) {
                 logger.debug("checking archive for url: " + url);
-                return archiver.check(url, function(err, result) {
-                  if (err != null) {
-                    ++e;
-                    logger.error(err);
-                  } else if ((result != null ? result.url : void 0) != null) {
-                    logger.debug("archive url for " + url + ": " + result.url + "; saving");
-                    doc.archiveUrl = result.url;
-                    doc.save();
-                  } else {
-                    logger.error("result.url was empty");
-                    reject("archiver check failed");
+
+                /*
+                next block is ignored for now, archiver.is and cloudflare are causing problems
+                 */
+                try {
+                  if (false) {
+                    archiver.check(url, function(err, result) {
+                      if (err != null) {
+                        ++e;
+                        return logger.error(err);
+                      } else if (result != null ? result.found : void 0) {
+                        logger.debug("archive url for " + url + ": " + result.url + "; saving");
+                        doc.archiveUrl = result.url;
+                        return doc.save();
+                      } else if (!(result != null ? result.found : void 0)) {
+                        return archiver.save(url);
+                      } else {
+                        logger.error("result.url was empty");
+                        return reject("archiver check failed");
+                      }
+                    });
                   }
-                  if (doc.screenshotPath == null) {
+                  if (!doc.screenshotPath) {
                     logger.debug("capture screenshot for url: " + url);
-                    return webCapture.capture(url, function(err, path) {
+                    webCapture.capture(url, function(err, path) {
                       if (err != null) {
                         ++e;
                         logger.error("capture failed for url: " + url);
@@ -603,19 +614,24 @@
                         logger.error({
                           error: err
                         });
+                        return doc.error = err;
                       } else {
-                        ++d;
+                        if (doc.error != null) {
+                          delete doc.error;
+                        }
                         doc.screenshotPath = path;
-                        doc.save();
-                        return checkExit();
+                        return doc.save();
                       }
                     });
                   } else {
-                    ++d;
                     doc.save();
-                    return checkExit();
                   }
-                });
+                } catch (error) {
+                  err = error;
+                  logger.error(err);
+                }
+                ++d;
+                return checkExit();
               };
               results = [];
               for (j = 0, len1 = docs.length; j < len1; j++) {

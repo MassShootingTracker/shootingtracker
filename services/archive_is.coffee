@@ -5,9 +5,7 @@ Reference = require('.././data/schema/reference')
 
 submitUrl = "https://archive.is/submit/"
 getUrl = "https://archive.is/"
-timeMapUrl =  'http://archive.is/timemap/'
-archive = require('archive.is')
-
+timeMapUrl = 'http://archive.is/timemap/'
 
 class ArchiveIS
 
@@ -28,19 +26,25 @@ class ArchiveIS
     )
 
   check: (url, cb) =>
-    @logger.trace "ArchiveIS tool checking #{url}"
     tmUrl = timeMapUrl + url
+    @logger.debug "ArchiveIS tool checking #{url}"
+    @logger.trace tmUrl
 
     # $ curl  http://archive.is/timemap/http://abc13.com/news/at-least-nine-people-shot-at-two-different-locations-across-area/1200220/
     # TimeMap does not exists. The archive has no Mementos for the requested URI
 
     request.get(tmUrl, {timeout: 10000}, (error, response, body) ->
-      if (not response? or response.statusCode != 200)
-        cb?({message: "Archive timemap check failed, status code: #{response?.statusCode or '(no status)'}"})
-      else if !error
-        cb?(null, {found: (body.indexOf('does not exist') == -1), url: tmUrl})
-      else
+      if error?
         cb?(error, null)
+      else
+        if (not response?)
+          cb?({message: "Archive timemap check failed, no response"}, null)
+        else if response.statusCode == 404 or response.statusCode == 504
+          cb?(null, found: false, url: tmUrl)
+        else if  response.statusCode == 200
+          cb?(null, found: body.indexOf('does not exists') == -1, url: tmUrl)
+        else
+          cb?({message: "Archive timemap check failed, statuscode was no 404, 504, 200"}, null)
     )
 
 

@@ -13,10 +13,10 @@
   "scripts": {
     "build": "gulp build",
     "test": "mocha test/integration/redisMongoDocs.js --grep \"post install\" --invert",
-    "debug": "LOG_LEVEL=trace node --debug --inspect index.js ",
+    "debug": "LOG_LEVEL=trace node --debug --inspect index.js |bunyan -o short",
     "watch": "nodemon -V -w controllers -w services -w index.js -w views -e js,hbs,coffee,yaml --exec npm -- run debug",
     "debug-brk": "gulp build &&  npm test && LOG_LEVEL=trace node --debug-brk index.js ",
-    "start": "LOG_LEVEL=warn node index.js",
+    "start": "node index.js",
     "withArchive": "ARCHIVE=true LOG_LEVEL=trace node --debug --inspect index.js|bunyan -o short",
     "update": "curl --data \"key=fkjnwkj2nk3r43tklnf4al&year=2016\" http://localhost:3030/update",
     "pm2": "pm2 start npm --name=mst --watch -- start"

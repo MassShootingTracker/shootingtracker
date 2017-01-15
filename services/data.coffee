@@ -279,7 +279,7 @@ class Data
     {data, year} = input
     logger.debug "data sample: ", data[0] if data?[0]
     if (not data) or data.length == 0
-      logger.warn "data input is 0, returning"
+      logger.trace "update from csv has no records in input, returning"
       return 0
     deleteRedisKey = @deleteRedisKey
 
@@ -397,12 +397,13 @@ class Data
   processArchives: (cb) =>
     promise = w.promise (resolve, reject) =>
       # we are doing 10 of these at a time with a delay to avoid getting cut off by archive.is
-      logger.debug 'finding unarchived documents'
+      logger.info 'Finding unarchived documents'
       try
         Reference.find(
-          $or: [{archiveUrl: {$eq: null}},{archiveUrl: {$exists: false}}]
+          #$or: [{archiveUrl: {$eq: null}},{archiveUrl: {$exists: false}}]
+          $or: [{screenshotPath: {$eq: null}},{screenshotPath: {$exists: false}}]
         )
-        .limit(10)
+        .limit(20)
         .exec (err, docs) ->
           c = docs.length
           if c == 0
@@ -421,32 +422,43 @@ class Data
           logger.debug "checking archive for #{c} entries"
 
           checkExit = ->
-            if e >= c
-              message = "All urls failed. See logs."
-              reject(message)
-            else if e > 0
-              message = "Some urls encountered an error, check logs."
-            else if d >= c
-              message = "OK"
-            if !!message
+            if d == c
+              if e >= c
+                message = "All urls failed. See logs."
+                reject(message)
+              else if e > 0
+                message = "Some urls encountered an error, check logs."
+              else if d >= c
+                message = "OK"
+              logger.info "Exiting processArchives, #{d} done, #{e} errors.", message
               resolve(message)
 
           checkUrl = (url, doc) ->
             # check the url with archive.is site
             logger.debug "checking archive for url: #{url}"
-            archiver.check(url, (err, result) ->
-              if err?
-                ++e
-                logger.error(err)
-              else if result?.url?
-                logger.debug "archive url for #{url}: #{result.url}; saving"
-                doc.archiveUrl = result.url
-                doc.save()
-              else
-                logger.error("result.url was empty")
-                reject("archiver check failed")
-              # take a screenshot
-              unless doc.screenshotPath?
+
+            ###
+            next block is ignored for now, archiver.is and cloudflare are causing problems
+            ###
+            try
+              if false
+                archiver.check(url, (err, result) ->
+                  if err?
+                    ++e
+                    logger.error(err)
+                  else if result?.found
+                    logger.debug "archive url for #{url}: #{result.url}; saving"
+                    doc.archiveUrl = result.url
+                    doc.save()
+                  else if not result?.found
+                    archiver.save(url) # don't really care about the response here, we'll just try later if it fails
+                  else
+                    logger.error("result.url was empty")
+                    reject("archiver check failed")
+                )
+
+              # take a screenshot if needed
+              unless !!doc.screenshotPath
                 logger.debug "capture screenshot for url: #{url}"
                 webCapture.capture(url, (err, path) ->
                   if err?
@@ -455,18 +467,21 @@ class Data
                     logger.error("document:")
                     logger.error(document: doc.model)
                     logger.error(error: err)
-                    return
+                    doc.error = err
                   else
-                    ++d
+                    delete doc.error if doc.error?
                     doc.screenshotPath = path
+                    logger.debug 'Saving document'
                     doc.save()
-                    checkExit()
                 )
               else
-                ++d
+                logger.debug 'Saving document'
                 doc.save()
-                checkExit()
-            )
+            catch err
+              logger.error err
+
+            ++d
+            checkExit()
 
           for doc in docs
             do (url = doc.url, doc = doc) ->
