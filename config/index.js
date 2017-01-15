@@ -9,7 +9,7 @@ try {
 }
 
 def = require('./default.json');
-conf = ld.merge(conf, def);
+conf = ld.merge(def, conf);
 
 if (process.env.pm_id) {
   console.log("process.env.pm_id : " + process.env.pm_id);
