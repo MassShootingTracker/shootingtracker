@@ -1,0 +1,22 @@
+# To build for on an alpine base. 
+FROM node:6-alpine
+
+WORKDIR /src
+ADD . .
+
+# Run this all on one line to prevent build crud from being saved on intermediary layers. 
+RUN apk add --no-cache make gcc g++ python && \
+    npm i -g gulp && \
+    npm install --development && \
+    gulp build && \
+    npm prune --production && \
+    npm cache clean && \
+    apk del make gcc g++ python && \
+    rm -rf /root/.node-gyp && \
+    rm -rf /tmp/*
+
+# Used used if not configured on docker cli or docker-config
+# ENV NODE_ENV production
+# EXPOSE 3030
+
+CMD ["npm", "start"]
