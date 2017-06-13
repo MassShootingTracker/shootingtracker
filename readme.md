@@ -1,5 +1,3 @@
-
-
 #Mass shooting tracker website
 
 ##Setting up the project:
