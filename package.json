@@ -17,7 +17,7 @@
     "watch": "nodemon -V -w controllers -w services -w index.js -w views -e js,hbs,coffee,yaml --exec npm -- run debug",
     "debug-brk": "gulp build &&  npm test && LOG_LEVEL=trace node --debug-brk index.js ",
     "start": "LOG_LEVEL=warn node index.js",
-    "update": "curl --data \"key=fkjnwkj2nk3r43tklnf4al&year=2016\" http://localhost:3030/update",
+    "update": "curl --data \"key=fkjnwkj2nk3r43tklnf4al&year=2019\" http://localhost:3030/update",
     "pm2": "pm2 start npm --name=mst -- start"
   },
   "license": "MIT",

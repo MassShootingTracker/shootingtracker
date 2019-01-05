@@ -8,6 +8,8 @@
 
 ### 2. Start in dev mode
 
+If running locally, redis and mongo must be running (`redis-server` and `mongod` in separate terminals) 
+
 `npm start` or `gulp run`
 
 * Uses nodemon to run node with hot reloading
