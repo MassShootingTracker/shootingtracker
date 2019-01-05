@@ -243,6 +243,7 @@ class Data
                       years = []
                       for year in [startYear..currentYear]
                         years.push(year)
+                        logger.warn("Getting totals for " + year)
                         do (year) ->
                           Shooting.count({year: year}).exec((err, count) ->
                             if err?

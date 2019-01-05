@@ -9,7 +9,9 @@
     "2015": "https://docs.google.com/spreadsheets/d/11KB81s3udI0evoIr-19MXb3aoqZvxiZIxyg0GXz_2rc/pub?output=csv",
     "2016": "https://docs.google.com/spreadsheets/d/1JbPA0RItVsqBFG72tVRrYv9ezC_8Qb2VLh6eJ7cxqXQ/pub?gid=0&single=true&output=csv",
     "2017": "https://docs.google.com/spreadsheets/d/1yrL1zCU5xV5q-q2X5xqXN8MCoAuhe-UogZXljshUU0k/pub?gid=0&single=true&output=csv",
-    "2018": "https://docs.google.com/spreadsheets/d/14cQykQyMV7ZMiU4Av0yASV_4PF1YxM0r6bHnvdhdrtg/pub?gid=0&single=true&output=csv"
+    "2018": "https://docs.google.com/spreadsheets/d/14cQykQyMV7ZMiU4Av0yASV_4PF1YxM0r6bHnvdhdrtg/pub?gid=0&single=true&output=csv",
+    "2019": "https://docs.google.com/spreadsheets/d/1WY74BHQy2kYhHod61wcqI35CHy-hnPsim2fFw_XcJCU/gviz/tq?tqx=out:csv&sheet=2019",
+    "2020": "https://docs.google.com/spreadsheets/d/1kppnXp8XR-xbzn0gw21cVdPkdNJH15RXab1qN_9RDMc/gviz/tq?tqx=out:csv&sheet=2020"
   },
   "mongo": {
     "url": "mongodb://localhost:27017/mst"
@@ -20,4 +22,8 @@
     "host": "127.0.0.1"
   }
 }
+
+
+
+
 
